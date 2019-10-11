@@ -2,6 +2,7 @@ const package = require('./package.json');
 const path = require('path');
 const webpack = require('webpack');
 
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
@@ -19,13 +20,26 @@ const postcssLoader = {
 };
 
 const cssLoader = [
-    styleLoader, {
+    styleLoader,
+    {
         loader: 'css-loader',
         options: {
             importLoaders: 1
         }
     },
     postcssLoader
+];
+
+const lessLoader = [
+    styleLoader,
+    {
+        loader: 'css-loader',
+        options: {
+            importLoaders: 2
+        }
+    },
+    postcssLoader,
+    'less-loader'
 ];
 
 module.exports = {
@@ -49,9 +63,9 @@ module.exports = {
                 options: {
                     loaders: {
                         'css': cssLoader,
-                        'js': {
-                            loader: 'babel-loader'
-                        }
+                        'less': lessLoader,
+                        'js': 'babel-loader',
+                        'i18n': '@kazupon/vue-i18n-loader'
                     }
                 }
             },
@@ -60,6 +74,11 @@ module.exports = {
                 test: /\.js$/,
                 loader: 'babel-loader',
                 exclude: [/node_modules/]
+            },
+
+            {
+                test: /\.less$/,
+                use: lessLoader
             },
 
             {
@@ -98,12 +117,23 @@ module.exports = {
     },
 
     plugins: [
-        new webpack.EnvironmentPlugin(['NODE_ENV']),
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': `"${nodeEnv}"`
+        }),
+        new HtmlWebpackPlugin({
+            template: './app/index.html',
+            filename: './index.html'
+        }),
         new MiniCssExtractPlugin({filename: '[name].bundle.css'}),
         new VueLoaderPlugin()
     ],
 
-    devtool: '#eval-source-map'
+    devtool: '#eval-source-map',
+    devServer: {
+        historyApiFallback: {
+            index: '/dist/'
+        }
+    }
 };
 
 if(nodeEnv === 'production') {
