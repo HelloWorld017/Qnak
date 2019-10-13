@@ -1,6 +1,6 @@
+import Archive from "./Archive.vue";
 import App from "./App.vue";
 import Index from "./pages/Index.vue";
-import Login from "./pages/Login.vue";
 import Theme from "./src/Theme";
 import Vue from "vue";
 import VueI18n from "vue-i18n";
@@ -13,7 +13,7 @@ Vue.use(VueRouter);
 	const router = new VueRouter({
 		routes: [
 			{ path: '/', component: Index },
-			{ path: '/login', component: Login }
+			{ path: '/archive/:context', component: Archive }
 		],
 		mode: 'history'
 	});
