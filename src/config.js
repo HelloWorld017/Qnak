@@ -25,8 +25,7 @@ module.exports = {
 			
 			elastic: {
 				url: 'localhost',
-				port: 9200,
-				index: 'qnak'
+				port: 9200
 			}
 		},
 		
