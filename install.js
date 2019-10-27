@@ -2,7 +2,7 @@ const database = require('./src/database');
 
 (async () => {
 	await database.init();
-	
+
 	const elastic = database.elastic;
 	elastic.indices.putSettings({
 		index: 'qnak-posts',
@@ -16,7 +16,7 @@ const database = require('./src/database');
 			}
 		}
 	});
-	
+
 	elastic.indices.putMapping({
 		index: 'qnak-posts',
 		body: {
@@ -30,7 +30,11 @@ const database = require('./src/database');
 						}
 					}
 				},
-				
+
+				tags: {
+					type: "keyword"
+				},
+
 				relation: {
 					type: "join",
 					relations: {
