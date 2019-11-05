@@ -1,11 +1,11 @@
 const {Router} = require('express');
 const router = new Router();
 
-router.get('/:loginName', (req, res) => {
+router.get('/:userId', (req, res) => {
 	
 });
 
-router.patch('/:loginName', (req, res) => {
+router.patch('/:userId', (req, res) => {
 	
 });
 

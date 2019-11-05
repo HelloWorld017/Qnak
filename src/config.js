@@ -26,6 +26,10 @@ module.exports = {
 			elastic: {
 				url: 'localhost',
 				port: 9200
+			},
+			
+			redis: {
+				url: 6379
 			}
 		},
 		
@@ -40,7 +44,8 @@ module.exports = {
 		userAcl: {
 			guest: {
 				privileged: [
-					'post.read'
+					'post.read',
+					'post.read.search'
 				]
 			},
 			
@@ -67,15 +72,22 @@ module.exports = {
 			}
 		},
 		
-		// Maximum request per 10 minutes
-		// All children of acl node are combined
 		ratelimit: {
-			'post.read': 3000,
-			'post.write': 60,
-			'post.update': 60,
-			'post.delete': 60,
-			'report.create': 60,
-			'user.updateInfo': 60
+			// Score is resetted per 10 minutes
+			score: 30000,
+			resetAfter: 10 * 60 * 1000,
+			
+			// Decreasing score
+			// All children of acl node are combined
+			entries: {
+				'post.read': 10,		// 3000 per 10 minutes
+				'post.read.search': 100,// 300 per 10 minuntes
+				'post.write': 500,		// 60 per 10 minutes
+				'post.update': 500,		// 60 per 10 minutes
+				'post.delete': 500,		// 60 per 10 minutes
+				'report.create': 500,	// 60 per 10 minutes
+				'user.updateInfo': 500	// 60 per 10 minutes
+			}
 		}
 	},
 
@@ -114,5 +126,12 @@ module.exports = {
 
 	async init() {
 		await this.load();
+	},
+	
+	middleware() {
+		return (req, res, next) => {
+			req.config = this.store;
+			next();
+		};
 	}
 };

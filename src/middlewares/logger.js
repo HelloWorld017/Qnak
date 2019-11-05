@@ -37,7 +37,7 @@ module.exports = expressLogger => (req, res, next) => {
 		}
 		length = chalk.grey(length);
 		
-		const user = req.loginName ? chalk.cyan(`@${req.loginName}`) : '';
+		const user = req.userId ? chalk.cyan(`@${req.userId}`) : '';
 		
 		expressLogger.http(`${method} ${url} ${status} ${elapsedStr} ${length} ${user}`);
 	});

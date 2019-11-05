@@ -1,4 +1,4 @@
-const calculateAcl = require('../utils/acl');
+const createHasAcl = require('../utils/createHasAcl');
 const jwt = require('jsonwebtoken');
 
 module.exports = async (req, res, next) => {
@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
 		token = await promisify(jwt.verify)(authToken, req.config.$secret);
 
 		const user = await req.mongo.collection('users').findOne({
-			loginName: token.loginName
+			userId: token.userId
 		});
 
 		if(token.lastUpdate !== user.lastUpdate) {
@@ -18,14 +18,14 @@ module.exports = async (req, res, next) => {
 		}
 		
 		req.authState = true;
+		req.userId = token.userId;
 		req.username = token.username;
-		req.loginName = token.loginName;
 		req.user = user;
-		req.acl = calculateAcl(user.acl);
+		req.acl = createHasAcl(user.acl);
 	} catch(err) {
 		req.authState = false;
-		req.acl = calculateAcl('guest');
+		req.acl = createHasAcl('guest');
 	}
-
+	
 	next();
 };

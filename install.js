@@ -17,28 +17,38 @@ const database = require('./src/database');
 		}
 	});
 
+	const noriAnalyzer = {
+		type: "text",
+		fields: {
+			nori: {
+				type: "text",
+				analyzer: "nori"
+			}
+		}
+	};
+	
 	elastic.indices.putMapping({
 		index: 'qnak-posts',
 		body: {
 			properties: {
-				content: {
-					type: "text",
-					fields: {
-						nori: {
-							type: "text",
-							analyzer: "nori"
-						}
-					}
-				},
+				title: noriAnalyzer,
+				content: noriAnalyzer,
 
-				tags: {
-					type: "keyword"
-				},
+				postId: {type: "keyword"},
+				commentId: {type: "keyword"},
+				answerId: {type: "keyword"},
+				tags: {type: "keyword"},
+				author: {type: "keyword"},
+				date: {type: "date"},
+				college: {type: "keyword"},
+				subject: {type: "keyword"},
+				anonymous: {type: "boolean"},
 
 				relation: {
 					type: "join",
 					relations: {
-						"question": ["answer", "comment"]
+						"question": ["answer", "comment"],
+						"answer": "comment"
 					}
 				}
 			}

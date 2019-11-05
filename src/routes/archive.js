@@ -1,7 +1,12 @@
+const Filter = require('../utils/Filter');
+const RegexPalette = require('../utils/RegexPalette');
 const {Router} = require('express');
-const router = new Router();
 
-router.get('/:archive?', (req, res) => {
+const aclRate = require('../middlewares/aclRate');
+const createAsyncRouter = require('../utils/createAsyncRouter');
+const router = createAsyncRouter();
+
+router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 	const query = {};
 
 	const archive = req.params.archive;
@@ -90,7 +95,7 @@ router.get('/:archive?', (req, res) => {
 			query.filter.range.date.lte = dateEnd;
 	}
 
-	const result = await req.elastic.search({
+	const {body: result} = await req.elastic.search({
 		index: 'qnak-posts',
 		body: {
 			query: {
@@ -99,11 +104,35 @@ router.get('/:archive?', (req, res) => {
 		}
 	});
 
-	// TODO return post object
+	res.json(
+		Filter.filterPosts(result)
+	);
 });
 
-router.get('/post/:postId', (req, res) => {
+router.get('/post/:postId', aclRate('post.read'), async (req, res) => {
+	const {postId} = req.params;
+	if(!RegexPalette.postId.test(postId)) {
+		throw new StatusCodeError(422, "Wrong Post ID");
+	}
+	
+	const {body: postData} = await req.elastic.search({
+		index: 'qnak-posts',
+		body: {
+			query: {
+				bool: {
+					filter: {
+						match: {postId}
+					}
+				}
+			}
+		}
+	});
+	
+	const postMetadata = await req.mongo.findOne()
+});
 
+router.get('/post/:postId/answers', aclRate('post.read'), async (req, res) => {
+	
 });
 
 module.exports = router;
