@@ -22,17 +22,17 @@ module.exports = {
 				id: 'USERNAME',
 				pw: 'PASSWORD'
 			},
-			
+
 			elastic: {
 				url: 'localhost',
 				port: 9200
 			},
-			
+
 			redis: {
 				url: 6379
 			}
 		},
-		
+
 		site: {
 			url: 'localhost'
 		},
@@ -45,38 +45,41 @@ module.exports = {
 			guest: {
 				privileged: [
 					'post.read',
-					'post.read.search'
+					'post.read.search',
+					'comment.read'
 				]
 			},
-			
+
 			user: {
 				base: 'guest',
 				privileged: [
-					'user.auth', 'user.updateInfo',
+					'user.auth', 'user.update',
 					'post.update.my', 'post.delete.my',
 					'post.write.ask', 'post.write.answer', 'post.write.ask.anonymous', 'post.write.answer.anonymous',
+					'comment.write', 'comment.update.my', 'comment.delete.my',
 					'report.create'
 				]
 			},
-			
+
 			admin: {
 				base: 'user',
 				privileged: [
 					'admin',
 					'board.setAcl',
-					'post.lock', 'post.update.any', 'post.delete.any', 'post.showRealName',
-					'user.authAsAnyone', 'user.setAcl', 'user.updateInfo',
+					'user.setAcl',
 					'ratelimit.bypass',
-					'report.view', 'report.delete',
+					'post.lock', 'post.update', 'post.delete', 'post.showRealName',
+					'comment.update', 'comment.delete',
+					'report.view', 'report.delete'
 				]
 			}
 		},
-		
+
 		ratelimit: {
 			// Score is resetted per 10 minutes
 			score: 30000,
 			resetAfter: 10 * 60 * 1000,
-			
+
 			// Decreasing score
 			// All children of acl node are combined
 			entries: {
@@ -101,7 +104,7 @@ module.exports = {
 
 		try {
 			const content = JSON.parse(await fs.readFile(this.path, 'utf8'));
-			
+
 			this.store = deepmerge(
 				this.default,
 				content,
@@ -127,7 +130,7 @@ module.exports = {
 	async init() {
 		await this.load();
 	},
-	
+
 	middleware() {
 		return (req, res, next) => {
 			req.config = this.store;

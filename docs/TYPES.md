@@ -42,16 +42,23 @@ Saved in `mongodb > qnak > posts`
 
 | Name     | Description                                                  |
 |----------|--------------------------------------------------------------|
+| postId   | Id of post, which is unique hexadecimal string.              |
+| author   | UserId of author                                             |
 | upvote   | Amount of upvotes                                            |
 | downvote | Amount of downvotes                                          |
+| answers  | Array of answers                                             |
+| comments | Array of commentId                                           |
 
 ## AnswerMetadata
 Saved in `mongodb > qnak > answers`
 
 | Name     | Description                                                  |
 |----------|--------------------------------------------------------------|
+| postId   | Id of post, which is unique hexadecimal string.              |
+| author   | UserId of author                                             |
 | upvote   | Amount of upvotes                                            |
 | downvote | Amount of downvotes                                          |
+| comments | Array of commentId                                           |
 
 # User
 ## User
