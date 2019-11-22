@@ -1,8 +1,9 @@
 const deepmerge = require('deepmerge');
 const fs = require('fs');
-const logger = require('./logger');
+const logger = require('./loggers').root;
+const path = require('path');
 
-module.exports = {
+const config = {
 	store: {},
 	path: './config.json',
 	default: {
@@ -38,7 +39,16 @@ module.exports = {
 		},
 
 		post: {
-			maxLength: 50000
+			maxLength: 50000,
+			uploads: {
+				dest: path.resolve(__dirname, '..', '..', './static/uploads'),
+				limits: {
+					fields: 512,
+					fileSize: 10 * 1024 * 1024,
+					files: 32,
+					parts: 128
+				}
+			}
 		},
 
 		userAcl: {
@@ -54,7 +64,7 @@ module.exports = {
 				base: 'guest',
 				privileged: [
 					'user.auth', 'user.update',
-					'post.update.my', 'post.delete.my',
+					'post.update.my', 'post.delete.my.unanswered',
 					'post.write.ask', 'post.write.answer', 'post.write.ask.anonymous', 'post.write.answer.anonymous',
 					'comment.write', 'comment.update.my', 'comment.delete.my',
 					'report.create'
@@ -94,16 +104,11 @@ module.exports = {
 		}
 	},
 
-	async generate() {
-		this.store = deepmerge({}, this.default);
-		await this.save();
-	},
-
-	async load(configPath) {
+	load(configPath) {
 		this.path = configPath || this.path;
 
 		try {
-			const content = JSON.parse(await fs.readFile(this.path, 'utf8'));
+			const content = JSON.parse(fs.readFileSync(this.path, 'utf8'));
 
 			this.store = deepmerge(
 				this.default,
@@ -120,15 +125,15 @@ module.exports = {
 			}
 		}
 
-		await this.save();
+		this.save();
 	},
 
-	async save() {
-		await fs.promises.writeFile(this.path, JSON.stringify(this.store, null, '\t'));
+	save() {
+		fs.writeFileSync(this.path, JSON.stringify(this.store, null, '\t'));
 	},
 
-	async init() {
-		await this.load();
+	init() {
+		this.load();
 	},
 
 	middleware() {
@@ -138,3 +143,7 @@ module.exports = {
 		};
 	}
 };
+
+config.load();
+
+module.exports = config;

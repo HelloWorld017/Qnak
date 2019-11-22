@@ -5,11 +5,11 @@ const getParentAcl = require('../utils/getParentAcl');
 
 module.exports = aclName => {
 	const parentAcls = getParentAcl(aclName);
-	const appliedRateLimit = parentAcls.find(key => config.ratelimit.entries[key] !== undefined);
-	const appliedScore = config.ratelimit.entries[appliedRateLimit];
+	const appliedRateLimit = parentAcls.find(key => config.store.ratelimit.entries[key] !== undefined);
+	const appliedScore = config.store.ratelimit.entries[appliedRateLimit];
 
 	return async (req, res, next) => {
-		if(!req.acl(aclName)) {
+		if(!req.acl.fromAllNodes(aclName)) {
 			throw new StatusCodeError(403, "Not allowed for the user to do this job.");
 		}
 
@@ -19,13 +19,23 @@ module.exports = aclName => {
 		}
 
 		const userId = req.authState ? req.userId : req.ip;
-		const rateData = await req.redis.hgetall(userId);
-		const update = client.multi();
+		const update = req.redis.multi();
+		
+		let rateData = await req.redis.hgetall(userId);
 		let allowed = false;
-
-		if(rateData.lastUpdate + config.ratelimit.resetAfter < Date.now()) {
+		
+		if(!rateData) {
+			rateData = {
+				lastUpdate: 0,
+				score: 0
+			};
+		}
+		
+		if(!rateData || rateData.lastUpdate + config.store.ratelimit.resetAfter < Date.now()) {
 			update.hset(userId, 'lastUpdate', Date.now());
-			update.hset(userId, 'score', config.ratelimit.score);
+			update.hset(userId, 'score', config.store.ratelimit.score);
+			
+			rateData.score = config.store.ratelimit.score;
 		}
 
 		if(rateData.score > appliedScore) {
@@ -39,7 +49,7 @@ module.exports = aclName => {
 			next();
 		} else {
 			res.set({
-				'Retry-After': rateData.lastUpdate + config.ratelimit.resetAfter - Date.now()
+				'Retry-After': rateData.lastUpdate + config.store.ratelimit.resetAfter - Date.now()
 			});
 
 			throw new StatusCodeError(429, "Too many requests requested.");

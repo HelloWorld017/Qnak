@@ -25,10 +25,13 @@ module.exports = {
 	
 		const client = await MongoClient.connect(
 			mongoUrl,
-			{useNewUrlParser: true}
+			{
+				useNewUrlParser: true,
+				useUnifiedTopology: true
+			}
 		);
 	
-		this.mongo = client.db(config.store.db.name);
+		this.mongo = client.db(config.store.db.mongodb.name);
 	},
 	
 	initElastic() {

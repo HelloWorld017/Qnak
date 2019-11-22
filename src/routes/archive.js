@@ -28,7 +28,7 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 				break;
 
 			case 'relevant':
-		 		break;
+				break;
 
 			case 'relevant_post':
 				break;
@@ -46,18 +46,18 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 
 		const searchFromParsed = searchFrom.split(',');
 		if(searchFromParsed.includes('content')) {
-			query.should.push({match: {content: searchQuery}});
+			query.should.push({match: {'content.analyzed': searchQuery}});
 		}
 
 		if(searchFromParsed.includes('title')) {
-			query.should.push({match: {title: searchQuery}});
+			query.should.push({match: {'title.analyzed': searchQuery}});
 		}
 
 		if(searchFromParsed.includes('comment')) {
 			query.should.push({
 				has_child: {
 					type: "comment",
-					query: {content: searchQuery}
+					query: {'content.analyzed': searchQuery}
 				}
 			});
 		}
@@ -66,7 +66,7 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 			query.should.push({
 				has_child: {
 					type: "answer",
-					query: {content: searchQuery}
+					query: {'content.analyzed': searchQuery}
 				}
 			});
 		}

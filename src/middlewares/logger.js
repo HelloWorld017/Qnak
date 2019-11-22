@@ -30,7 +30,7 @@ module.exports = expressLogger => (req, res, next) => {
 		const size = res.getHeader('content-length');
 		if (~[204, 205, 304].indexOf(res.statusCode)) {
 			length = ''
-		} else if (len == null) {
+		} else if (size == null) {
 			length = '-'
 		} else {
 			length = bytes(size);

@@ -2,47 +2,50 @@
 ## Post
 Saved in: `elastic > qnak-posts`
 
-| Name     | Description                                                  |
-|----------|--------------------------------------------------------------|
-| postId   | Id of post, which is unique hexadecimal string.              |
-| title    | Title of post                                                |
-| author   | UserId of author                                             |
-| content  | Content of post                                              |
-| date     | The unix timestamp (in milliseconds) of last modified time.  |
-| college  | Alphabet letters of subject code (Ex: CS, MAS, HSS, IE, ...) |
-| subject  | Subject code                                                 |
-| relation | Join type of document, for post, it's name is 'question'.    |
-| anonymous| Is this value is true, the author becomes hidden             |
+| Name        | Description                                                  |
+|-------------|--------------------------------------------------------------|
+| postId      | Id of post, which is unique decimal string.                  |
+| title       | Title of post                                                |
+| author      | UserId of author                                             |
+| content     | Content of post                                              |
+| date        | The unix timestamp (in milliseconds) of last modified time.  |
+| college     | Alphabet letters of subject code (Ex: CS, MAS, HSS, IE, ...) |
+| subject     | Subject code                                                 |
+| relation    | Join type of document, for post, it's name is 'question'.    |
+| anonymous   | Is this value is true, the author becomes hidden             |
+| attachments | Array of attachment Ids                                      |
 
 ## Comment
 Saved in: `elastic > qnak-posts`
 
-| Name      | Description                                                 |
-|-----------|-------------------------------------------------------------|
-| commentId | Id of comment, which is unique hexadecimal string.          |
-| author    | UserId of author of comment                                 |
-| content   | Content of comment                                          |
-| date      | The unix timestamp (in milliseconds) of last modified time. |
-| relation  | Join type of document, for comment, it's name is 'comment'. |
+| Name      | Description                                                                     |
+|-----------|---------------------------------------------------------------------------------|
+| commentId | Id of comment, which is unique decimal string.                                  |
+| author    | UserId of author of comment                                                     |
+| content   | Content of comment                                                              |
+| date      | The unix timestamp (in milliseconds) of last modified time.                     |
+| relation  | Join type of document, for comment, it's name is 'comment'.                     |
+| targetId  | Parent postId or parent answerId                                                |
 
 ## Answer
 Saved in: `elastic > qnak-posts`
 
-| Name     | Description                                                  |
-|----------|--------------------------------------------------------------|
-| answerId | Id of answer, which is unique hexadecimal string.            |
-| author   | UserId of author of answer                                   |
-| content  | Content of answer                                            |
-| date     | The unix timestamp (in milliseconds) of last modified time.  |
-| relation | Join type of document, for answer, it's name is 'answer'.    |
-| anonymous| Is this value is true, the author becomes hidden             |
+| Name        | Description                                                  |
+|-------------|--------------------------------------------------------------|
+| answerId    | Id of answer, which is unique decimal string.                |
+| author      | UserId of author of answer                                   |
+| content     | Content of answer                                            |
+| date        | The unix timestamp (in milliseconds) of last modified time.  |
+| relation    | Join type of document, for answer, it's name is 'answer'.    |
+| anonymous   | Is this value is true, the author becomes hidden             |
+| attachments | Array of attachment Ids                                      |
 
 ## PostMetadata
 Saved in `mongodb > qnak > posts`
 
 | Name     | Description                                                  |
 |----------|--------------------------------------------------------------|
-| postId   | Id of post, which is unique hexadecimal string.              |
+| postId   | Id of post, which is unique decimal string.                  |
 | author   | UserId of author                                             |
 | upvote   | Amount of upvotes                                            |
 | downvote | Amount of downvotes                                          |
@@ -54,7 +57,7 @@ Saved in `mongodb > qnak > answers`
 
 | Name     | Description                                                  |
 |----------|--------------------------------------------------------------|
-| postId   | Id of post, which is unique hexadecimal string.              |
+| postId   | Id of post, which is unique decimal string.                  |
 | author   | UserId of author                                             |
 | upvote   | Amount of upvotes                                            |
 | downvote | Amount of downvotes                                          |
@@ -73,3 +76,17 @@ Saved in `mongodb > qnak > users`
 | totalMinusPoint |                                                              |
 | plusPoint       |                                                              |
 | totalPlusPoint  |                                                              |
+| upvotedPosts    | Array of post id which the user upvoted                      |
+| downvotedPosts  | Array of post id which the user downvoted                    |
+| requestedBoards | Array of board id which the user requested to be created     |
+
+# Board
+## Board
+Saved in `mongodb > qnak > boards`
+| Name            | Description                                                  |
+|-----------------|--------------------------------------------------------------|
+| boardId         | Id of the board (subject code)                               |
+| title           | Name of the board (Subject name)                             |
+| college         | Alphabet letters of subject code                             |
+| created         | Is created or pending for create request                     |
+| requestCount    | Amount of users who want this board to be created            |

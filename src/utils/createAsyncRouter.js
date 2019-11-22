@@ -1,6 +1,8 @@
 const {Router} = require('express');
 const loggers = require('../loggers');
 
+const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+
 function wrapAsyncHandler(fn, nextLocation = null) {
 	return (...fnArgs) => {
 		const nextAt = nextLocation === null ? fnArgs.length - 1 : nextLocation;
@@ -38,7 +40,7 @@ module.exports = function createAsyncRouter() {
 			if(monkeyPatchNames.includes(name)) {
 				return (...args) => {
 					args.map(fn => {
-						if(typeof fn !== 'function') return fn;
+						if(!(fn instanceof AsyncFunction)) return fn;
 						
 						return wrapAsyncHandler(fn);
 					});
@@ -49,10 +51,12 @@ module.exports = function createAsyncRouter() {
 			
 			if(name === 'param') {
 				return (...args) => {
-					args[args.length - 1] = wrapAsyncHandler(
-						args[args.length - 1],
-						2
-					);
+					if(args[args.length - 1] instanceof AsyncFunction) {
+						args[args.length - 1] = wrapAsyncHandler(
+							args[args.length - 1],
+							2
+						);
+					}
 					
 					return target[name](...args);
 				};
