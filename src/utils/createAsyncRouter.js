@@ -39,13 +39,13 @@ module.exports = function createAsyncRouter() {
 		get(target, name) {
 			if(monkeyPatchNames.includes(name)) {
 				return (...args) => {
-					args.map(fn => {
-						if(!(fn instanceof AsyncFunction)) return fn;
-						
-						return wrapAsyncHandler(fn);
-					});
-					
-					return target[name](...args);
+					return target[name](
+						...args.map(fn => {
+							if(!(fn instanceof AsyncFunction)) return fn;
+							
+							return wrapAsyncHandler(fn);
+						})
+					);
 				};
 			}
 			

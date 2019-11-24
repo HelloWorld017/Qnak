@@ -18,32 +18,37 @@ module.exports = aclName => {
 			return;
 		}
 
-		const userId = req.authState ? req.userId : req.ip;
+		const userAclKey = `acl_${req.authState ? req.userId : req.ip}`;
 		const update = req.redis.multi();
 		
-		let rateData = await req.redis.hgetall(userId);
-		let allowed = false;
+		let rateData = await req.redis.hgetall(userAclKey);
+		let allowed = false, modified = false;
 		
-		if(!rateData) {
+		if(!rateData.lastUpdate) {
 			rateData = {
 				lastUpdate: 0,
 				score: 0
 			};
 		}
 		
-		if(!rateData || rateData.lastUpdate + config.store.ratelimit.resetAfter < Date.now()) {
-			update.hset(userId, 'lastUpdate', Date.now());
-			update.hset(userId, 'score', config.store.ratelimit.score);
+		if(rateData.lastUpdate + config.store.ratelimit.resetAfter < Date.now()) {
+			update.hset(userAclKey, 'lastUpdate', Date.now());
+			update.hset(userAclKey, 'score', config.store.ratelimit.score);
 			
 			rateData.score = config.store.ratelimit.score;
+			modified = true;
 		}
 
 		if(rateData.score > appliedScore) {
+			update.hincrby(userAclKey, 'score', -appliedScore);
 			allowed = true;
-			update.hincrby(userId, 'score', -appliedScore);
+			modified = true;
 		}
-
-		await update.exec();
+		
+		if(modified) {
+			update.expire(userAclKey, config.store.ratelimit.resetAfter / 1000);
+			await update.exec();
+		}
 
 		if(allowed) {
 			next();
@@ -51,7 +56,7 @@ module.exports = aclName => {
 			res.set({
 				'Retry-After': rateData.lastUpdate + config.store.ratelimit.resetAfter - Date.now()
 			});
-
+			
 			throw new StatusCodeError(429, "Too many requests requested.");
 		}
 	};

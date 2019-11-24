@@ -39,6 +39,22 @@ const port = parseInt(process.env.PORT) || '8080';
 	app.use('/board', routeBoard);
 	app.use('/post', routePost);
 	app.use('/user', routeUser);
+	app.use((err, req, res, next) => {
+		if(err.statusCode) {
+			res.status(err.statusCode).json({
+				ok: false,
+				reason: err.message
+			});
+			return;
+		}
+		
+		res.status(500).json({
+			ok: false,
+			reason: 'internal-server'
+		});
+		
+		loggers.express.fatal(err);
+	});
 	
 	app.listen(app.get('port'));
 	

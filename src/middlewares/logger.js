@@ -11,7 +11,7 @@ module.exports = expressLogger => (req, res, next) => {
 		const icon = `${httpTypes[req.method] || httpTypes.etc} ${req.method.toLowerCase()}`;
 		
 		let color = 'cyan';
-		const statusType = res.statusCode % 100;
+		const statusType = Math.floor(res.statusCode / 100);
 		if (statusType === 2) color = 'green';
 		else if(statusType === 4) color = 'yellow';
 		else if (statusType === 5) color = 'red';

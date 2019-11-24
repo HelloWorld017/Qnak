@@ -14,7 +14,12 @@ const config = {
 			.split('')
 			.map(v => Math.random() < 0.5 ? v.toUpperCase() : v.toLowerCase())
 			.join(''),
-
+		
+		security: {
+			sessionExpiresIn: 2 * 60 * 1000,
+			tokenExpiresIn: 30 * 1000
+		},
+		
 		db: {
 			mongodb: {
 				url: 'localhost',
@@ -56,16 +61,17 @@ const config = {
 				privileged: [
 					'post.read',
 					'post.read.search',
-					'comment.read'
+					'comment.read',
+					'user.auth'
 				]
 			},
 
 			user: {
 				base: 'guest',
 				privileged: [
-					'user.auth', 'user.update',
+					'user.update',
 					'post.update.my', 'post.delete.my.unanswered',
-					'post.write.ask', 'post.write.answer', 'post.write.ask.anonymous', 'post.write.answer.anonymous',
+					'post.write.ask.pub', 'post.write.answer', 'post.write.ask.anonymous', 'post.write.answer.anonymous',
 					'comment.write', 'comment.update.my', 'comment.delete.my',
 					'report.create'
 				]
@@ -99,8 +105,13 @@ const config = {
 				'post.update': 500,		// 60 per 10 minutes
 				'post.delete': 500,		// 60 per 10 minutes
 				'report.create': 500,	// 60 per 10 minutes
-				'user.updateInfo': 500	// 60 per 10 minutes
+				'user.updateInfo': 500,	// 60 per 10 minutes
+				'user.auth': 1000		// 30 per 10 minutes
 			}
+		},
+		
+		points: {
+			initialPoint: 0
 		}
 	},
 

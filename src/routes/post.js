@@ -104,7 +104,7 @@ router.param('postId', async (req, res, next, postId) => {
 	};
 	
 	req.getPostMetadata = async () => {
-		const postMetadata = await req.mongo.findOne({
+		const postMetadata = await req.mongo.collection('posts').findOne({
 			postId
 		});
 		

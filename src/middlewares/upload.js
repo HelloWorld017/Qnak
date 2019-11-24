@@ -1,17 +1,13 @@
 const config = require('../config');
 const multer = require('multer');
 
-let upload;
+const upload = multer(config.store.post.uploads);
 const uploadMap = {};
 
-module.exports = (name, ...descriptor) => async (req, res, next) => {
-	if(!upload) {
-		upload = multer(req.config.post.uploads);
-	}
+module.exports = (name, ...descriptor) => {
+	uploadMap[name] = upload.fields(descriptor);
 	
-	if(!uploadMap[name]) {
-		uploadMap[name] = upload.fields(descriptor);
-	}
-	
-	uploadMap[name](req, res, next);
+	return async (req, res, next) => {
+		uploadMap[name](req, res, next);
+	};
 };
