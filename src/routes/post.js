@@ -15,7 +15,7 @@ const sanitizer = new Sanitizer();
 
 router.post('/', aclRate('post.write.ask'), upload('postUpload', {name: 'attachments'}), async (req, res) => {
 	if(!req.body || typeof req.body !== 'object') {
-		throw new StatusCodeError(422, "Post description not given.");
+		throw new StatusCodeError(422, "post-description-not-given");
 	}
 	
 	let {title, content, subject, anonymous} = req.body;
@@ -23,24 +23,24 @@ router.post('/', aclRate('post.write.ask'), upload('postUpload', {name: 'attachm
 		typeof title !== 'string' || typeof content !== 'string' ||
 		typeof subject !== 'string' || typeof anonymous !== 'boolean'
 	) {
-		throw new StatusCodeError(422, "Wrong given for post description.");
+		throw new StatusCodeError(422, "wrong-given-for-post-description");
 	}
 	
 	content = sanitizer.sanitizeContent(content);
 	if(title.length === 0 || content.length === 0)
-		throw new StatusCodeError(422, "Some content is empty");
+		throw new StatusCodeError(422, "some-content-is-empty");
 	
 	board = await req.mongo.collection('board')
 		.findOne({boardId: subject});
 	
 	if(!board)
-		throw new StatusCodeError(422, "No such board exists");
+		throw new StatusCodeError(422, "no-such-board-exists");
 	
 	if(!userId)
-		throw new StatusCodeError(403, "Not Authorized");
+		throw new StatusCodeError(403, "not-authorized");
 	
 	if((anonymous && !req.acl('post.write.ask.anonymous')) || (!anonymous && !req.acl('post.write.ask.public')))
-		throw new StatusCodeError(403, "Not allowed for the user to do this job.");
+		throw new StatusCodeError(403, "not-allowed-to-do-this-job");
 	
 	const postFeatureIndex = Math.floor(content.length / 2);
 	const postIdHex =
@@ -79,7 +79,7 @@ router.post('/', aclRate('post.write.ask'), upload('postUpload', {name: 'attachm
 
 router.param('postId', async (req, res, next, postId) => {
 	if(!RegexPalette.postId.test(postId)) {
-		throw new StatusCodeError(422, "Wrong Post ID");
+		throw new StatusCodeError(422, "wrong-post-id");
 	}
 	
 	req.getPostContent = async () => {
@@ -97,7 +97,7 @@ router.param('postId', async (req, res, next, postId) => {
 		});
 		
 		if(postData.hits.hits.length === 0) {
-			throw new StatusCodeError(404, "No such post");
+			throw new StatusCodeError(404, "no-such-post");
 		}
 		
 		return postData.hits.hits[0];

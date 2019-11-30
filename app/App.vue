@@ -12,6 +12,7 @@
 
 <style lang="less" scoped>
 	#App {
+		display: flex;
 		width: 100vw;
 		height: 100vh;
 		border-top: solid 10px var(--theme-color);

@@ -1,6 +1,7 @@
 class Theme {
 	constructor(theme) {
 		const defaultTheme = {
+			'main-font': '"Noto Sans CJK KR", sans-serif',
 			'theme-color': '#f4516f',
 			'grey-100': '#fafafa'
 		};

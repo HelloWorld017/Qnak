@@ -67,19 +67,21 @@ Saved in `mongodb > qnak > answers`
 ## User
 Saved in `mongodb > qnak > users`
 
-| Name            | Description                                                  |
-|-----------------|--------------------------------------------------------------|
-| userId          | Unique identification (sso uid)                              |
-| username        | Name of user (first_name + ' ' + last_name)                  |
-| point           |                                                              |
-| minusPoint      |                                                              |
-| totalMinusPoint |                                                              |
-| plusPoint       |                                                              |
-| totalPlusPoint  |                                                              |
-| upvotedPosts    | Array of post id which the user upvoted                      |
-| downvotedPosts  | Array of post id which the user downvoted                    |
-| requestedBoards | Array of board id which the user requested to be created     |
-| lastUpdate      |                                                              |
+| Name            | Description                                                                    |
+|-----------------|--------------------------------------------------------------------------------|
+| userId          | Unique identification (sso uid)                                                |
+| friendlyUid     | Unique identification but generated with username (`/^[a-zA-Z가-힣]+#[0-9]+$/`) |
+| username        | Name of user (first_name + ' ' + last_name)                                    |
+| profile         | Path of user profile image, null if profile image doesn't exist                |
+| point           |                                                                                |
+| minusPoint      |                                                                                |
+| totalMinusPoint |                                                                                |
+| plusPoint       |                                                                                |
+| totalPlusPoint  |                                                                                |
+| upvotedPosts    | Array of post id which the user upvoted                                        |
+| downvotedPosts  | Array of post id which the user downvoted                                      |
+| requestedBoards | Array of board id which the user requested to be created                       |
+| lastUpdate      | Tokens created before this becomes invalidated                                 |
 
 # Board
 ## Board

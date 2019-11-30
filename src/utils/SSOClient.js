@@ -137,7 +137,7 @@ class Client {
 			const res = await Client._postData(this.URLS.token_info, params);
 			return res;
 		} catch (err) {
-			return err;
+			throw err;
 		}
 	}
 

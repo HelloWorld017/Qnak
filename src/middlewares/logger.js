@@ -8,7 +8,7 @@ module.exports = expressLogger => (req, res, next) => {
 	req.startTime = Date.now();
 	
 	onFinished(res, () => {
-		const icon = `${httpTypes[req.method] || httpTypes.etc} ${req.method.toLowerCase()}`;
+		const icon = `${httpTypes[req.method.toLowerCase()] || httpTypes.etc} ${req.method.toLowerCase()}`;
 		
 		let color = 'cyan';
 		const statusType = Math.floor(res.statusCode / 100);

@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 module.exports = async (req, res, next) => {
 	let session = {};
 	let buffer = new Map;
@@ -8,7 +10,7 @@ module.exports = async (req, res, next) => {
 			if(buffer.has(key))
 				return buffer.get(key);
 			
-			else if(buffer.hasOwnProperty(key))
+			else if(session.hasOwnProperty(key))
 				return session[key];
 			
 			return undefined;
@@ -37,13 +39,14 @@ module.exports = async (req, res, next) => {
 			
 			res.cookie('sessKey', random, {
 				httpOnly: true,
+				secure: req.app.get('env') === 'development',
 				maxAge: req.config.security.sessionExpiresIn
 			});
 		}
 	};
 	
-	if(req.cookie.sessKey && typeof req.cookie.sessKey === 'string') {
-		sessKey = `sess_${req.cookie.sessKey}`;
+	if(req.cookies.sessKey && typeof req.cookies.sessKey === 'string') {
+		sessKey = `sess_${req.cookies.sessKey}`;
 		session = await req.redis.hgetall(sessKey);
 	} else {
 		await descriptor.reallocate();

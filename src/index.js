@@ -1,6 +1,8 @@
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const config = require('./config');
+const cors = require('cors');
+const csp = require('./middlewares/csp');
 const database = require('./database');
 const express = require('express');
 const loggers = require('./loggers');
@@ -11,11 +13,28 @@ const routeBoard = require('./routes/board');
 const routePost = require('./routes/post');
 const routeUser = require('./routes/user');
 
-const port = parseInt(process.env.PORT) || '8080';
+const port = parseInt(process.env.PORT) || '8081';
 
 (async () => {
 	config.init();
 	await database.init();
+	
+	const corsAllowed = [new URL(config.store.site.url).hostname];
+	const corsOption = {
+		origin(origin, callback) {
+			try {
+				const url = new URL(origin);
+				if(corsAllowed.includes(url.hostname)) {
+					return callback(null, true);
+				}
+				
+				callback(null, false);
+			} catch(err) {
+				callback(err);
+			}
+		},
+		credentials: true
+	};
 	
 	const app = express();
 	app.set('port', port);
@@ -28,6 +47,8 @@ const port = parseInt(process.env.PORT) || '8080';
 	app.use(config.middleware());
 	app.use(database.middleware());
 	app.use(middlewareAuth());
+	app.use(cors(corsOption));
+	app.use(csp);
 	app.get('/', (req, res) => {
 		res.status(418).json({
 			'qnak': 'A QnA-like application',

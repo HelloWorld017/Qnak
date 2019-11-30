@@ -1,11 +1,11 @@
 <template>
 	<div id="Archive">
-		<qk-topbar :title="board.name"></qk-topbar>
+		<qk-header :title="board.name"></qk-header>
 	</div>
 </template>
 
 <script>
-	import QkTopbar from "../layouts/QkTopbar.vue";
+	import QkHeader from "../layouts/QkHeader.vue";
 
 	export default {
 		data() {
@@ -28,7 +28,7 @@
 		},
 
 		components: {
-			QkTopbar
+			QkHeader
 		}
 	};
 </script>

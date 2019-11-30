@@ -16,7 +16,7 @@ const config = {
 			.join(''),
 		
 		security: {
-			sessionExpiresIn: 2 * 60 * 1000,
+			sessionExpiresIn: 5 * 60 * 1000,
 			tokenExpiresIn: 30 * 1000
 		},
 		
@@ -40,7 +40,7 @@ const config = {
 		},
 
 		site: {
-			url: 'localhost'
+			url: 'http://localhost:8080/'
 		},
 
 		post: {
@@ -106,7 +106,7 @@ const config = {
 				'post.delete': 500,		// 60 per 10 minutes
 				'report.create': 500,	// 60 per 10 minutes
 				'user.updateInfo': 500,	// 60 per 10 minutes
-				'user.auth': 1000		// 30 per 10 minutes
+				'user.auth': 500		// 60 per 10 minutes
 			}
 		},
 		

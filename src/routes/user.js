@@ -1,35 +1,91 @@
 const aclRate = require('../middlewares/aclRate');
 const config = require('../config');
 const createAsyncRouter = require('../utils/createAsyncRouter');
+const crypto = require('crypto');
+const eccrypto = require('eccrypto');
+const jwt = require('jsonwebtoken');
 const session = require('../middlewares/session');
 
+const RegexPalette = require('../utils/RegexPalette');
 const SSOClient = require('../utils/SSOClient');
 const StatusCodeError = require('../utils/StatusCodeError');
 
 const router = createAsyncRouter();
 const ssoClient = new SSOClient('test4bc872bb1371bc6d', '0a9a32efaaeb2deb4855')
 
-router.get('/auth', session, (req, res) => {
+router.post('/auth', aclRate('user.auth'), session, async (req, res) => {
+	const {state, url} = ssoClient.getLoginParams();
+	
+	await req.session.reallocate();
+	
+	req.session.ssoState = state;
+	await req.session.flush();
+	
+	res.json({
+		ok: true,
+		url
+	});
+});
+
+router.post('/auth/finalize', aclRate('user.auth'), session, async (req, res) => {
+	if(req.authState) {
+		res.status(200).json({
+			ok: true
+		});
+	}
+	
 	if(!req.session.ssoState) {
-		throw new StatusCodeError(400, "Authentication haven't started.");
+		throw new StatusCodeError(400, "authentication-not-started");
 	}
 	
-	const newState = req.query.state;
-	if(newState !== req.session.ssoState) {
-		throw new StatusCodeError(400, "Session might be hijacked.");
+	const newState = req.body.state;
+	if(typeof newState !== 'string' || newState !== req.session.ssoState) {
+		throw new StatusCodeError(400, "session-might-hijacked");
 	}
 	
-	const code = req.query.code;
-	const userData = ssoClient.getUserInfo(code);
+	const code = req.body.code;
+	if(typeof code !== 'string') {
+		throw new StatusCodeError(422, "code-not-given");
+	}
+	
+	let userData;
+	
+	try {
+		userData = await ssoClient.getUserInfo(code);
+	} catch(err) {
+		throw new StatusCodeError(400, "cannot-get-user-info");
+	}
 	
 	let qnakUser = await req.mongo.collection('users').findOne({
 		userId: userData.uid
 	});
 	
 	if(!qnakUser) {
+		let friendlyUidBase = `${userData.first_name}${userData.last_name}`
+			.replace(RegexPalette.illegalFriendlyUidBase, '');
+		
+		if(!friendlyUidBase) friendlyUidBase = 'user';
+		
+		const friendlyUidHash = crypto.createHash('sha256').update(friendlyUidBase).digest('hex');
+		let friendlyUidModifier = parseInt(friendlyUidHash.slice(0, 3), 16);
+		let doubleHashing = parseInt(friendlyUidHash.slice(3, 5), 16);
+		
+		// Find nearest available friendlyUid
+		while(true) {
+			const exists = await db.collection('user').findOne({
+				friendlyUid: `${friendlyUidBase}#${friendlyUidModifier}`
+			});
+			
+			if(!exists) break;
+			
+			friendlyUidModifier += doubleHashing;
+		}
+		
 		qnakUser = {
 			userId: userData.uid,
+			friendlyUid: `${friendlyUidBase}#${friendlyUidModifier}`,
 			username: `${userData.first_name} ${userData.last_name}`,
+			profile: null,
 			point: req.config.points.initialPoint,
 			minusPoint: 0,
 			totalMinusPoint: 0,
@@ -47,17 +103,16 @@ router.get('/auth', session, (req, res) => {
 	const random = await new Promise((resolve, reject) => {
 		crypto.randomBytes(32, (err, randomBytes) => {
 			if(err) return reject(err);
-			resolve(randomBytes.toString('hex'));
+			resolve(randomBytes);
 		});
 	});
 	
-	const message = `TokenVerification:${random}`;
 	const privateKey = eccrypto.generatePrivate();
 	const publicKey = eccrypto.getPublic(privateKey);
 	
-	const signature = await eccrypto.sign(privateKey, message);
+	const signature = await eccrypto.sign(privateKey, random);
 	
-	const token = await new Promise((reject, resolve) => {
+	const token = await new Promise((resolve, reject) => {
 		jwt.sign({
 			publicKey: publicKey.toString('hex'),
 			userId: qnakUser.userId,
@@ -71,21 +126,16 @@ router.get('/auth', session, (req, res) => {
 		});
 	});
 	
-	res.cookie('jwtVerification', signature.toString('hex'), {
+	res.cookie('tokenVerification', signature.toString('hex'), {
 		httpOnly: true,
+		secure: req.app.get('env') === 'development',
 		maxAge: req.config.security.sessionExpiresIn
 	});
-});
-
-router.post('/auth', aclRate('user.auth'), session, async (req, res) => {
-	const {state, url} = ssoClient.getLoginParams();
-	
-	await req.session.reallocate();
-	req.session.ssoState = state;
 	
 	res.json({
 		ok: true,
-		url
+		authedAs: qnakUser.username,
+		token
 	});
 });
 

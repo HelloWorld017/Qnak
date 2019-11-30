@@ -1,6 +1,6 @@
 <template>
 	<div id="Index">
-		<qk-topbar></qk-topbar>
+		<qk-header></qk-header>
 
 		<div class="QkContainer">
 			<qk-tiny-listing></qk-tiny-listing>
@@ -14,14 +14,30 @@
 	</div>
 </template>
 
+<style lang="less" scoped>
+	#Index {
+		flex: 1;
+	}
+</style>
+
 <script>
+	import QkHeader from "../layouts/QkHeader.vue";
 	import QkTinyListing from "../layouts/QkTinyListing.vue";
-	import QkTopbar from "../layouts/QkTopbar.vue";
+	
+	import iziToast from "izitoast";
 
 	export default {
 		components: {
-			QkTinyListing,
-			QkTopbar
+			QkHeader,
+			QkTinyListing
+		},
+		
+		async mounted() {
+			const {code, state} = this.$route.query;
+			
+			if(code && state) {
+				await this.$store.dispatch('auth/finalize', {code, state});
+			}
 		}
 	};
 </script>
