@@ -18,17 +18,12 @@ Vue.use(VueRouter);
 const QnakApp = {};
 
 (async () => {
-	const i18n = new VueI18n({
-		messages: {
-			'ko-KR': require('./i18n/ko-KR.json'),
-			'en-US': require('./i18n/en-US.json')
-		}
-	});
+	const i18n = new VueI18n();
 	QnakApp.i18n = i18n;
-	
+
 	const request = new VueRequest();
 	QnakApp.request = request;
-	
+
 	const router = new VueRouter({
 		routes: [
 			{ path: '/', component: Index },
@@ -37,14 +32,15 @@ const QnakApp = {};
 		mode: 'history'
 	});
 	QnakApp.router = router;
-	
+
 	const store = new Vuex.Store(storeDescriptor);
 	QnakApp.store = store;
-	
+
 	const theme = await Theme.load();
-	theme.apply();
-	QnakApp.theme = theme;
+	theme.apply(QnakApp);
 	
+	QnakApp.theme = theme;
+
 	const vm = new Vue({
 		el: '#App',
 		store,

@@ -9,10 +9,10 @@ class VueRequest {
 				return true;
 			}
 		});
-		
+
 		this.api = this.request.bind(this);
 	}
-	
+
 	async request(url, method = 'get', body = null) {
 		const configuration = {
 			url,
@@ -29,12 +29,11 @@ class VueRequest {
 		const {data} = await this.default(configuration);
 		return data;
 	}
-	
+
 	static install(Vue, options) {
-		console.log(options, Vue.$options);
 		Object.defineProperty(Vue.prototype, '$api', {
 			get() {
-				return Vue.$options.request.api;
+				return this.$options.request.api;
 			}
 		});
 	}

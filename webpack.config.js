@@ -64,10 +64,15 @@ module.exports = {
                     loaders: {
                         'css': cssLoader,
                         'less': lessLoader,
-                        'js': 'babel-loader',
-                        'i18n': '@kazupon/vue-i18n-loader'
+                        'js': 'babel-loader'
                     }
                 }
+            },
+
+            {
+                resourceQuery: /blockType=i18n/,
+                type: 'javascript/auto',
+                loader: '@kazupon/vue-i18n-loader',
             },
 
             {

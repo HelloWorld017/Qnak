@@ -10,6 +10,9 @@
 	</div>
 </template>
 
+<i18n locale="ko" src="./i18n/ko.json"/>
+<i18n locale="en" src="./i18n/en.json"/>
+
 <style lang="less" scoped>
 	#App {
 		display: flex;
