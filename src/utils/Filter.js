@@ -22,11 +22,23 @@ const Filter = {
 	},
 	
 	filterUser(user, isMe = false) {
-		const allowedKeys = ['userId', 'username', 'plusPoint'];
-		if(isMe)
-			allowedKeys.push('point', 'minusPoint');
+		const allowedKeys = [
+			'userId', 'friendlyUid', 'username',
+			'plusPoint', 'minusPoint',
+			'profile'
+		];
+		
+		if(isMe) allowedKeys.push('boards', 'point');
 		
 		return Filter.filterObject(user, allowedKeys);
+	},
+	
+	filterBoard(board) {
+		const allowedKeys = [
+			'boardId', 'title', 'college', 'created', 'requestCount'
+		];
+		
+		return Filter.filterObject(board, allowedKeys);
 	}
 };
 

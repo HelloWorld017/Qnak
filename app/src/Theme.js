@@ -4,6 +4,11 @@ class Theme {
 			'main-font': '"Noto Sans CJK KR", sans-serif',
 			'theme-color': '#f4516f',
 			'grey-100': '#fafafa',
+			'grey-200': '#f1f2f3',
+			'grey-300': '#cacbcc',
+			'grey-400': '#8a8a8b',
+			'grey-500': '#6a6a6a',
+			'grey-800': '#202020',
 			'lang': 'ko'
 		};
 

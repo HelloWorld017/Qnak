@@ -1,5 +1,6 @@
 const createHasAcl = require('../utils/createHasAcl');
 const jwt = require('jsonwebtoken');
+const { promisify } = require('util');
 
 module.exports = () => {
 	createHasAcl.init();
@@ -23,6 +24,7 @@ module.exports = () => {
 			req.authState = true;
 			req.userId = token.userId;
 			req.username = token.username;
+			req.friendlyUid = token.friendlyUid;
 			req.user = user;
 			req.acl = createHasAcl(user.acl, req);
 		} catch(err) {

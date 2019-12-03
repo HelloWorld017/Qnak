@@ -1,6 +1,6 @@
 <template>
-	<div id="Index">
-		<qk-header></qk-header>
+	<main id="Index">
+		<qk-header />
 
 		<div class="QkContainer">
 			<qk-tiny-listing></qk-tiny-listing>
@@ -11,7 +11,7 @@
 				<qk-tiny-listing></qk-tiny-listing>
 			</div>
 		</div>
-	</div>
+	</main>
 </template>
 
 <style lang="less" scoped>

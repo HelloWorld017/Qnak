@@ -30,11 +30,11 @@ router.post('/', aclRate('post.write.ask'), upload('postUpload', {name: 'attachm
 	if(title.length === 0 || content.length === 0)
 		throw new StatusCodeError(422, "some-content-is-empty");
 	
-	board = await req.mongo.collection('board')
+	board = await req.mongo.collection('boards')
 		.findOne({boardId: subject});
 	
 	if(!board)
-		throw new StatusCodeError(422, "no-such-board-exists");
+		throw new StatusCodeError(422, "no-such-board");
 	
 	if(!userId)
 		throw new StatusCodeError(403, "not-authorized");

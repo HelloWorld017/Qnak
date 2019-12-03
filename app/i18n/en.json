@@ -1,4 +1,6 @@
 {
 	"login-failed": "Login fail",
-	"login-failed-desc": "Login has been failed. Please try again."
+	"login-failed-desc": "Login has been failed. Please try again.",
+	"request-failed": "Connection Failed",
+	"request-failed-desc": "Please check your connection."
 }

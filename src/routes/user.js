@@ -6,6 +6,7 @@ const eccrypto = require('eccrypto');
 const jwt = require('jsonwebtoken');
 const session = require('../middlewares/session');
 
+const Filter = require('../utils/Filter');
 const RegexPalette = require('../utils/RegexPalette');
 const SSOClient = require('../utils/SSOClient');
 const StatusCodeError = require('../utils/StatusCodeError');
@@ -14,6 +15,13 @@ const router = createAsyncRouter();
 const ssoClient = new SSOClient('test4bc872bb1371bc6d', '0a9a32efaaeb2deb4855')
 
 router.post('/auth', aclRate('user.auth'), session, async (req, res) => {
+	if(req.authState) {
+		res.status(200).json({
+			ok: true,
+			alreadyAuthed: true
+		});
+	}
+	
 	const {state, url} = ssoClient.getLoginParams();
 	
 	await req.session.reallocate();
@@ -30,7 +38,8 @@ router.post('/auth', aclRate('user.auth'), session, async (req, res) => {
 router.post('/auth/finalize', aclRate('user.auth'), session, async (req, res) => {
 	if(req.authState) {
 		res.status(200).json({
-			ok: true
+			ok: true,
+			alreadyAuthed: true
 		});
 	}
 	
@@ -72,7 +81,7 @@ router.post('/auth/finalize', aclRate('user.auth'), session, async (req, res) =>
 		
 		// Find nearest available friendlyUid
 		while(true) {
-			const exists = await db.collection('user').findOne({
+			const exists = await req.mongo.collection('user').findOne({
 				friendlyUid: `${friendlyUidBase}#${friendlyUidModifier}`
 			});
 			
@@ -86,13 +95,23 @@ router.post('/auth/finalize', aclRate('user.auth'), session, async (req, res) =>
 			friendlyUid: `${friendlyUidBase}#${friendlyUidModifier}`,
 			username: `${userData.first_name} ${userData.last_name}`,
 			profile: null,
+			acl: {
+				base: 'user',
+				privileged: [],
+				restricted: []
+			},
+			
 			point: req.config.points.initialPoint,
 			minusPoint: 0,
 			totalMinusPoint: 0,
 			plusPoint: 0,
 			totalPlusPoint: 0,
+			
 			upvotedPosts: [],
 			downvotedPosts: [],
+			
+			boards: [],
+			favoriteBoards: [],
 			requestedBoards: [],
 			lastUpdate: Date.now()
 		};
@@ -117,6 +136,7 @@ router.post('/auth/finalize', aclRate('user.auth'), session, async (req, res) =>
 			publicKey: publicKey.toString('hex'),
 			userId: qnakUser.userId,
 			username: qnakUser.username,
+			friendlyUid: qnakUser.friendlyUid,
 			lastUpdate: qnakUser.lastUpdate
 		}, req.config.$secret, {
 			expiresIn: req.config.security.tokenExpiresIn
@@ -128,26 +148,37 @@ router.post('/auth/finalize', aclRate('user.auth'), session, async (req, res) =>
 	
 	res.cookie('tokenVerification', signature.toString('hex'), {
 		httpOnly: true,
-		secure: req.app.get('env') === 'development',
+		secure: req.app.get('env') !== 'development',
 		maxAge: req.config.security.sessionExpiresIn
 	});
 	
 	res.json({
 		ok: true,
-		authedAs: qnakUser.username,
 		token
 	});
 });
 
-router.param('userId', (req, res, next, userId) => {
-	if(!userId.startsWith('~')) return next();
+router.get('/me', (req, res) => {
+	if(req.authState) {
+		return res.json({
+			ok: true,
+			authed: true,
+			authedAs: Filter.filterUser(req.user, true),
+			acl: req.acl.value
+		});
+	}
+	
+	return res.json({
+		ok: true,
+		authed: false
+	});
 });
 
-router.get('/:userId', (req, res) => {
+router.get('/:userId(~[a-zA-Z가-힣]+#[0-9]+)', (req, res) => {
 	
 });
 
-router.patch('/:userId', (req, res) => {
+router.patch('/:userId(~[a-zA-Z가-힣]+#[0-9]+)', (req, res) => {
 	
 });
 

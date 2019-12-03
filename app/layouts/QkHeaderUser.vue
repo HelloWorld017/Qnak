@@ -2,7 +2,15 @@
 	<div class="QkHeaderUser">
 		<button class="QkHeaderUser__button" @click="loginOrOpen">
 			<template v-if="authState">
-
+				<div class="QkHeaderUser__user">
+					<img class="QkHeaderUser__profile" :src="profile">
+					<div class="QkHeaderUser__description">
+						<span class="QkHeaderUser__username">{{user.username}}</span>
+						<span class="QkHeaderUser__friendlyUid">@{{user.friendlyUid}}</span>
+					</div>
+					
+					<icon-dropdown />
+				</div>
 			</template>
 			<template v-else>
 				{{$t('login')}}
@@ -14,16 +22,49 @@
 
 <style lang="less" scoped>
 	.QkHeaderUser {
+		margin-left: 15px;
+		height: 100%;
+		
 		&__button {
+			cursor: pointer;
 			background: transparent;
 			border: none;
+			outline: none;
 			font-family: var(--main-font);
 			font-size: 1.1rem;
-			font-weight: 600;
 		}
 
 		&__icon {
 			margin-left: 20px;
+		}
+		
+		&__description {
+			margin-left: 10px;
+			margin-right: 20px;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+		}
+		
+		&__username {
+			font-weight: 600;
+			font-size: 1.2rem;
+		}
+		
+		&__friendlyUid {
+			font-size: .8rem;
+			color: var(--grey-500);
+		}
+		
+		&__profile {
+			width: 60px;
+			height: 60px;
+			border-radius: 5px;
+		}
+		
+		&__user {
+			display: flex;
+			align-items: center;
 		}
 	}
 </style>
@@ -46,11 +87,20 @@
 
 <script>
 	import IconArrowRight from "../images/IconArrowRight.svg?inline";
+	import IconDropdown from "../images/IconDropdown.svg?inline";
 
 	export default {
 		computed: {
 			authState() {
 				return this.$store.getters['auth/authState'];
+			},
+			
+			user() {
+				return this.$store.state.auth.user;
+			},
+			
+			profile() {
+				return this.$store.getters['auth/profileImage'];
 			}
 		},
 
@@ -59,20 +109,21 @@
 				if(!this.authState) {
 					const authStart = await this.$api('/user/auth', 'post');
 					if(!authStart.ok) {
-						iziToast.error({
-							theme: 'dark',
-							title: App.i18n.t('auth-start-failed'),
-							message: App.i18n.t('auth-start-failed-desc'),
-							position: 'topCenter',
-							timeout: 3000
-						});
+						return this.$app.errorDialog.show('auth-start-failed');
+					}
+					
+					if(authStart.url) {
+						location.href = authStart.url;
+					} else {
+						await this.$store.dispatch('auth/init');
 					}
 				}
 			}
 		},
 
 		components: {
-			IconArrowRight
+			IconArrowRight,
+			IconDropdown
 		}
 	};
 </script>

@@ -39,7 +39,7 @@ module.exports = async (req, res, next) => {
 			
 			res.cookie('sessKey', random, {
 				httpOnly: true,
-				secure: req.app.get('env') === 'development',
+				secure: req.app.get('env') !== 'development',
 				maxAge: req.config.security.sessionExpiresIn
 			});
 		}

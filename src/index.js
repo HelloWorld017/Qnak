@@ -22,6 +22,8 @@ const port = parseInt(process.env.PORT) || '8081';
 	const corsAllowed = [new URL(config.store.site.url).hostname];
 	const corsOption = {
 		origin(origin, callback) {
+			if(!origin) return callback(null, false);
+			
 			try {
 				const url = new URL(origin);
 				if(corsAllowed.includes(url.hostname)) {
@@ -40,13 +42,13 @@ const port = parseInt(process.env.PORT) || '8081';
 	app.set('port', port);
 	app.set('trust proxy', 'loopback');
 	
-	app.use(middlewareLogger(loggers.express));
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({extended: false}));
 	app.use(cookieParser());
 	app.use(config.middleware());
 	app.use(database.middleware());
 	app.use(middlewareAuth());
+	app.use(middlewareLogger(loggers.express));
 	app.use(cors(corsOption));
 	app.use(csp);
 	app.get('/', (req, res) => {

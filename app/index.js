@@ -1,5 +1,6 @@
 import Archive from "./pages/Archive.vue";
 import App from "./App.vue";
+import ErrorDialog from "./src/utils/ErrorDialog";
 import Index from "./pages/Index.vue";
 import Theme from "./src/Theme";
 import Vue from "vue";
@@ -7,6 +8,7 @@ import Vuex from "vuex";
 import VueI18n from "vue-i18n";
 import VueRequest from "./src/plugins/VueRequest";
 import VueRouter from "vue-router";
+import Write from "./pages/Write.vue";
 
 import storeDescriptor from "./src/store";
 
@@ -27,7 +29,8 @@ const QnakApp = {};
 	const router = new VueRouter({
 		routes: [
 			{ path: '/', component: Index },
-			{ path: '/archive/:context', component: Archive }
+			{ path: '/archive/:context', component: Archive },
+			{ path: '/write/:board?', component: Write }
 		],
 		mode: 'history'
 	});
@@ -38,8 +41,10 @@ const QnakApp = {};
 
 	const theme = await Theme.load();
 	theme.apply(QnakApp);
-	
 	QnakApp.theme = theme;
+	
+	const errorDialog = new ErrorDialog(QnakApp);
+	QnakApp.error = errorDialog;
 
 	const vm = new Vue({
 		el: '#App',
@@ -52,6 +57,10 @@ const QnakApp = {};
 		}
 	});
 	QnakApp.vm = vm;
+	
+	Vue.prototype.$app = QnakApp;
+	
+	await QnakApp.store.dispatch('init');
 })();
 
 export default QnakApp;

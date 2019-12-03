@@ -33,7 +33,7 @@ class VueRequest {
 	static install(Vue, options) {
 		Object.defineProperty(Vue.prototype, '$api', {
 			get() {
-				return this.$options.request.api;
+				return this.$root.$options.request.api;
 			}
 		});
 	}

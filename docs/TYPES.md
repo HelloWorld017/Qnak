@@ -72,7 +72,8 @@ Saved in `mongodb > qnak > users`
 | userId          | Unique identification (sso uid)                                                |
 | friendlyUid     | Unique identification but generated with username (`/^[a-zA-Z가-힣]+#[0-9]+$/`) |
 | username        | Name of user (first_name + ' ' + last_name)                                    |
-| profile         | Path of user profile image, null if profile image doesn't exist                |
+| acl             | Permissions that user have                                                     |
+| profile         | Relative path of profile image (base: static/uploads), null if doesn't exist   |
 | point           |                                                                                |
 | minusPoint      |                                                                                |
 | totalMinusPoint |                                                                                |
@@ -80,6 +81,8 @@ Saved in `mongodb > qnak > users`
 | totalPlusPoint  |                                                                                |
 | upvotedPosts    | Array of post id which the user upvoted                                        |
 | downvotedPosts  | Array of post id which the user downvoted                                      |
+| boards          | Array of boardId of boards user have added                                     |
+| favoriteBoards  | Array of boardId of boards user have starred                                   |
 | requestedBoards | Array of board id which the user requested to be created                       |
 | lastUpdate      | Tokens created before this becomes invalidated                                 |
 

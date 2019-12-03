@@ -111,10 +111,7 @@ class Acl extends Function {
 	};
 }
 
-module.exports = (aclObject, req) => {
-	return new Acl(aclObject, req);
-};
-
+module.exports = (aclObject, req) => new Acl(aclObject, req);
 module.exports.init = () => {
 	Object.keys(config.store.userAcl).forEach(calculateAcl);
 };

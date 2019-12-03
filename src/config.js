@@ -46,7 +46,7 @@ const config = {
 		post: {
 			maxLength: 50000,
 			uploads: {
-				dest: path.resolve(__dirname, '..', '..', './static/uploads'),
+				dest: path.resolve(__dirname, '..', './static/uploads'),
 				limits: {
 					fields: 512,
 					fileSize: 10 * 1024 * 1024,
