@@ -5,6 +5,7 @@ class Theme {
 			'theme-color': '#f4516f',
 			'grey-100': '#fafafa',
 			'grey-200': '#f1f2f3',
+			'grey-250': '#e4e5e6',
 			'grey-300': '#cacbcc',
 			'grey-400': '#8a8a8b',
 			'grey-500': '#6a6a6a',

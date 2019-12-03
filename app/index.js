@@ -12,6 +12,8 @@ import Write from "./pages/Write.vue";
 
 import storeDescriptor from "./src/store";
 
+import "@mdi/font";
+
 Vue.use(Vuex);
 Vue.use(VueI18n);
 Vue.use(VueRequest);

@@ -121,6 +121,10 @@ module.exports = {
         ]
     },
 
+    resolve: {
+        mainFields: ['browser', 'module', 'style', 'main']
+    },
+    
     plugins: [
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': `"${nodeEnv}"`
