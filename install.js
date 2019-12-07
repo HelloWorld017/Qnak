@@ -35,7 +35,7 @@ const loggers = require('./src/loggers');
 				mappings: {
 					properties: {
 						title: noriAnalyzer,
-						content: noriAnalyzer,
+						excerpt: noriAnalyzer,
 
 						postId: {type: "keyword"},
 						commentId: {type: "keyword"},
@@ -69,9 +69,6 @@ const loggers = require('./src/loggers');
 	loggers.root.info('[2 / 2] Setting mongodb...');
 	try {
 		const mongo = database.mongo;
-		
-		await mongo.createCollection('answers');
-		await mongo.collection('answers').createIndex({answerId: -1});
 		
 		await mongo.createCollection('boards');
 		await mongo.collection('boards').createIndex({boardId: -1});

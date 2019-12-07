@@ -9,20 +9,21 @@ export default {
 
 	state: {
 		user: null,
-		userBoards: {}
+		acl: []
 	},
 
 	mutations: {
 		reset(state) {
 			state.user = null;
+			state.acl = [];
 		},
 		
 		setUser(state, user) {
 			state.user = user;
 		},
 		
-		setUserBoards(state, userBoards) {
-			state.userBoards = userBoards;
+		setAcl(state, acl) {
+			state.acl = acl;
 		}
 	},
 
@@ -45,19 +46,14 @@ export default {
 			if(!result.ok)
 				return App.errorDialog.show('request-failed');
 			
+			
 			if(!result.authed) {
-				return commit('reset');
+				commit('reset');
+			} else {
+				commit('setUser', result.authedAs);
 			}
 			
-			commit('setUser', result.authedAs);
-			
-			if(result.authedAs.boards) {
-				const userBoards = await Promise.all(result.authedAs.boards.map(async boardId => {
-					return (await App.request.api(`/board/${boardId}`)).board;
-				}));
-				
-				commit('setUserBoards', userBoards);
-			}
+			commit('setAcl', result.acl);
 		},
 		
 		async finalize({ commit, dispatch }, { code, state }) {

@@ -10,7 +10,7 @@ const Filter = {
 	
 	filterPost(post) {
 		const allowedKeys = [
-			'postId', 'title', 'content', 'date', 'college', 'subject', 'anonymous',
+			'postId', 'title', 'content', 'date', 'college', 'subject', 'anonymous', 'board',
 			...(post.anonymous ? [] : ['author'])
 		];
 		

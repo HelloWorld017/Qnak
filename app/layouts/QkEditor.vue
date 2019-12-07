@@ -71,6 +71,7 @@
 			background: var(--grey-200);
 			border: none;
 			border-radius: 2px;
+			outline-color: var(--grey-800);
 			margin: 0 5px;
 			padding: 2px 5px;
 			font-size: 1.3rem;
@@ -82,7 +83,13 @@
 			}
 			
 			&--active {
+				background: var(--theme-color);
+				outline-color: var(--theme-300);
+				color: var(--grey-100);
 				
+				&:hover {
+					background: var(--theme-300);
+				}
 			}
 		}
 	}
@@ -91,8 +98,28 @@
 <style lang="less">
 	.QkEditor__content .ProseMirror {
 		outline: none;
+		
+		p.is-empty:first-child::before {
+			content: attr(data-empty-text);
+			float: left;
+			color: #aaa;
+			pointer-events: none;
+			height: 0;
+			font-style: italic;
+		}
 	}
 </style>
+
+<i18n>
+{
+	"ko": {
+		"editor-placeholder": "여기에 입력하세요"
+	},
+	"en": {
+		"editor-placeholder": "Write Here"
+	}
+}
+</i18n>
 
 <script>
 	import { Editor, EditorContent, EditorMenuBar } from "tiptap";
@@ -113,7 +140,7 @@
 						new Italic(),
 						new Placeholder({
 							emptyNodeClass: 'is-empty',
-							emptyNodeText: 'Write something …',
+							emptyNodeText: this.$t('editor-placeholder'),
 							showOnlyWhenEditable: true
 						}),
 						new Strike(),
@@ -139,6 +166,10 @@
 		methods: {
 			getContent() {
 				return this.editor.getHTML();
+			},
+			
+			getFiles() {
+				return [];
 			}
 		},
 		

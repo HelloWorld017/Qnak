@@ -2,5 +2,7 @@
 	"login-failed": "Login fail",
 	"login-failed-desc": "Login has been failed. Please try again.",
 	"request-failed": "Connection Failed",
-	"request-failed-desc": "Please check your connection."
+	"request-failed-desc": "Please check your connection.",
+	"write-failed": "Failed to upload your post.",
+	"write-failed-desc": "Please try again."
 }

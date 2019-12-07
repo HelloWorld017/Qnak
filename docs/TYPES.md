@@ -6,11 +6,12 @@ Saved in: `elastic > qnak-posts`
 |-------------|--------------------------------------------------------------|
 | postId      | Id of post, which is unique decimal string.                  |
 | title       | Title of post                                                |
-| author      | UserId of author                                             |
-| content     | Content of post                                              |
+| author      | FriendlyUid of author                                        |
+| excerpt     | Excerpt of post (texts in html)                              |
 | date        | The unix timestamp (in milliseconds) of last modified time.  |
 | college     | Alphabet letters of subject code (Ex: CS, MAS, HSS, IE, ...) |
 | subject     | Subject code                                                 |
+| tags        | List of tags                                                 |
 | relation    | Join type of document, for post, it's name is 'question'.    |
 | anonymous   | Is this value is true, the author becomes hidden             |
 | attachments | Array of attachment Ids                                      |
@@ -21,7 +22,7 @@ Saved in: `elastic > qnak-posts`
 | Name      | Description                                                                     |
 |-----------|---------------------------------------------------------------------------------|
 | commentId | Id of comment, which is unique decimal string.                                  |
-| author    | UserId of author of comment                                                     |
+| author    | FriendlyUid of author of comment                                                |
 | content   | Content of comment                                                              |
 | date      | The unix timestamp (in milliseconds) of last modified time.                     |
 | relation  | Join type of document, for comment, it's name is 'comment'.                     |
@@ -32,9 +33,9 @@ Saved in: `elastic > qnak-posts`
 
 | Name        | Description                                                  |
 |-------------|--------------------------------------------------------------|
-| answerId    | Id of answer, which is unique decimal string.                |
-| author      | UserId of author of answer                                   |
-| content     | Content of answer                                            |
+| postId      | Id of answer, which is unique decimal string.                |
+| author      | FriendlyUid of author of answer                              |
+| excerpt     | Excerpt of answer                                            |
 | date        | The unix timestamp (in milliseconds) of last modified time.  |
 | relation    | Join type of document, for answer, it's name is 'answer'.    |
 | anonymous   | Is this value is true, the author becomes hidden             |
@@ -46,21 +47,24 @@ Saved in `mongodb > qnak > posts`
 | Name     | Description                                                  |
 |----------|--------------------------------------------------------------|
 | postId   | Id of post, which is unique decimal string.                  |
-| author   | UserId of author                                             |
+| content  | HTML of content                                              |
+| author   | FriendlyUid of author                                        |
 | upvote   | Amount of upvotes                                            |
 | downvote | Amount of downvotes                                          |
 | answers  | Array of answers                                             |
 | comments | Array of commentId                                           |
 
 ## AnswerMetadata
-Saved in `mongodb > qnak > answers`
+Saved in `mongodb > qnak > posts`
 
 | Name     | Description                                                  |
 |----------|--------------------------------------------------------------|
 | postId   | Id of post, which is unique decimal string.                  |
-| author   | UserId of author                                             |
+| content  | Content of answer                                            |
+| author   | FriendlyUid of author                                        |
 | upvote   | Amount of upvotes                                            |
 | downvote | Amount of downvotes                                          |
+| parent   | postId of ask                                                |
 | comments | Array of commentId                                           |
 
 # User

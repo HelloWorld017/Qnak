@@ -3,7 +3,12 @@ class Theme {
 		const defaultTheme = {
 			'main-font': '"Noto Sans CJK KR", sans-serif',
 			'theme-color': '#f4516f',
+			'theme-300': '#f66f88',
+			'theme-400': '#f4516f',
+			
+			'grey-050': '#ffffff',
 			'grey-100': '#fafafa',
+			'grey-150': '#f5f6f7',
 			'grey-200': '#f1f2f3',
 			'grey-250': '#e4e5e6',
 			'grey-300': '#cacbcc',

@@ -158,18 +158,26 @@ router.post('/auth/finalize', aclRate('user.auth'), session, async (req, res) =>
 	});
 });
 
-router.get('/me', (req, res) => {
+router.get('/me', async (req, res) => {
 	if(req.authState) {
+		const user = Object.assign({}, req.user);
+		user.boards = (await req.mongo.collection('boards').find({
+			boardId: {
+				$in: user.boards
+			}
+		}).toArray()).map(board => Filter.filterBoard(board));
+		
 		return res.json({
 			ok: true,
 			authed: true,
-			authedAs: Filter.filterUser(req.user, true),
+			authedAs: Filter.filterUser(user, true),
 			acl: req.acl.value
 		});
 	}
 	
-	return res.json({
+	res.json({
 		ok: true,
+		acl: req.acl.value,
 		authed: false
 	});
 });

@@ -2,5 +2,14 @@
 	"login-failed": "로그인 실패",
 	"login-failed-desc": "로그인에 실패했습니다. 다시 시도해주세요.",
 	"request-failed": "연결 오류",
-	"request-failed-desc": "연결 상태를 다시 확인해주세요."
+	"request-failed-desc": "연결 상태를 다시 확인해주세요.",
+	"write-failed": "게시글 작성에 실패했습니다.",
+	"write-failed-desc": "조금 후에 다시 시도해주세요.",
+	"post-description-not-given": "몇몇 정보가 빠져 있습니다.",
+	"some-content-is-empty": "내용이 비어있습니다.",
+	"no-such-board": "게시판이 존재하지 않습니다.",
+	"not-authorized": "로그인 되어있지 않습니다.",
+	"not-allowed-to-do-this-job": "권한이 없습니다. 관리자에게 문의해주세요.",
+	"post-show-failed": "포스트 가져오기 실패",
+	"post-show-failed-desc": "포스트를 가져오는 동안 문제가 발생했습니다!"
 }
