@@ -18,18 +18,18 @@ const port = parseInt(process.env.PORT) || '8081';
 (async () => {
 	config.init();
 	await database.init();
-	
+
 	const corsAllowed = [new URL(config.store.site.url).hostname];
 	const corsOption = {
 		origin(origin, callback) {
 			if(!origin) return callback(null, false);
-			
+
 			try {
 				const url = new URL(origin);
 				if(corsAllowed.includes(url.hostname)) {
 					return callback(null, true);
 				}
-				
+
 				callback(null, false);
 			} catch(err) {
 				callback(err);
@@ -37,11 +37,11 @@ const port = parseInt(process.env.PORT) || '8081';
 		},
 		credentials: true
 	};
-	
+
 	const app = express();
 	app.set('port', port);
 	app.set('trust proxy', 'loopback');
-	
+
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({extended: false}));
 	app.use(cookieParser());
@@ -63,23 +63,27 @@ const port = parseInt(process.env.PORT) || '8081';
 	app.use('/post', routePost);
 	app.use('/user', routeUser);
 	app.use((err, req, res, next) => {
-		if(err.statusCode) {
-			res.status(err.statusCode).json({
+		if(err.qnakStatusCode) {
+			res.status(err.qnakStatusCode).json({
 				ok: false,
 				reason: err.message
 			});
 			return;
 		}
-		
+
 		res.status(500).json({
 			ok: false,
 			reason: 'internal-server'
 		});
-		
+
 		loggers.express.fatal(err);
+
+		if(app.get('env') === 'development') {
+			console.log(require('util').inspect(err, { depth: null }));
+		}
 	});
-	
+
 	app.listen(app.get('port'));
-	
+
 	loggers.root.info(`Listening on port ${port}`);
 })();

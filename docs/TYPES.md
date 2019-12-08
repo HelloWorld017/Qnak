@@ -49,6 +49,7 @@ Saved in `mongodb > qnak > posts`
 |-------------|--------------------------------------------------------------|
 | postId      | Id of post, which is unique decimal string.                  |
 | author      | FriendlyUid of author                                        |
+| authorName  | Username of author                                           |
 | title       | Title of post                                                |
 | content     | HTML of content                                              |
 | date        | The unix timestamp (in milliseconds) of last modified time.  |
@@ -73,6 +74,7 @@ Saved in `mongodb > qnak > posts`
 | anonymous   | Is this value is true, the author becomes hidden             |
 | attachments | Array of attachment Ids                                      |
 | author      | FriendlyUid of author                                        |
+| authorName  | Username of author of answer                                 |
 | upvote      | Amount of upvotes                                            |
 | downvote    | Amount of downvotes                                          |
 | parent      | postId of ask                                                |

@@ -14,14 +14,14 @@ const config = {
 			.split('')
 			.map(v => Math.random() < 0.5 ? v.toUpperCase() : v.toLowerCase())
 			.join(''),
-		
+
 		security: {
 			sessionExpiresIn: 5 * 60 * 1000,
 			tokenExpiresIn: 30 * 1000,
-			ssoId: 'test4bc872bb1371bc6d',
-			ssoSecret: '0a9a32efaaeb2deb4855'
+			ssoId: 'YOUR_SSO_ID_HERE',
+			ssoSecret: 'YOUR_SSO_SECRET_HERE'
 		},
-		
+
 		db: {
 			mongodb: {
 				url: 'localhost',
@@ -122,7 +122,7 @@ const config = {
 				'tags.list': 100
 			}
 		},
-		
+
 		points: {
 			initialPoint: 0
 		}

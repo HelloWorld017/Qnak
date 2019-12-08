@@ -7,24 +7,24 @@ const router = createAsyncRouter();
 
 router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 	const query = {};
-	
+
 	const archive = req.params.archive;
 	if(typeof archive === 'string' && archive.length > 0) {
 		if(!query.filter) query.filter = {};
-		if(!query.filter.terms) query.filter.terms = {};
+		if(!query.filter.term) query.filter.term = {};
 
 		const archiveSplit = archive.split(':');
 		switch(archiveSplit[0]) {
 			case 'user':
-				query.filter.terms.author = `${archiveSplit[1]}#${archiveSplit[2]}`;
+				query.filter.term.author = `${archiveSplit[1]}#${archiveSplit[2]}`;
 				break;
 
 			case 'college':
-				query.filter.terms.college = archiveSplit[1];
+				query.filter.term.college = archiveSplit[1];
 				break;
 
 			case 'subject':
-				query.filter.terms.subject = archiveSplit[1];
+				query.filter.term.subject = archiveSplit[1];
 				break;
 
 			case 'relevant':
@@ -46,7 +46,7 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 
 		const searchFromParsed = searchFrom.split(',');
 		if(searchFromParsed.includes('content')) {
-			query.should.push({match: {'content.analyzed': searchQuery}});
+			query.should.push({match: {'excerpt.analyzed': searchQuery}});
 		}
 
 		if(searchFromParsed.includes('title')) {
@@ -57,7 +57,7 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 			query.should.push({
 				has_child: {
 					type: "comment",
-					query: {'content.analyzed': searchQuery}
+					query: {match: {'excerpt.analyzed': searchQuery}}
 				}
 			});
 		}
@@ -66,9 +66,13 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 			query.should.push({
 				has_child: {
 					type: "answer",
-					query: {'content.analyzed': searchQuery}
+					query: {match: {'excerpt.analyzed': searchQuery}}
 				}
 			});
+		}
+
+		if(query.should.length > 0) {
+			query.minimum_should_match = 1;
 		}
 	}
 
@@ -96,21 +100,13 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 		if(typeof dateEnd === 'number')
 			query.filter.range.date.lte = dateEnd;
 	}
-	
+
 	const page = parseInt(req.query.page);
 	const paginationFrom =
 		(isFinite(page) && page >= 0) ?
 		Math.min(req.config.post.pagination.maxPage, page) * req.config.post.pagination.pageBy :
 		0;
-	
-	console.log(JSON.stringify({
-		query: {
-			bool: query
-		},
-		size: req.config.post.pagination.pageBy,
-		from: paginationFrom
-	}, null, '\t'));
-	
+
 	const {body: result} = await req.elastic.search({
 		index: 'qnak-posts',
 		body: {
@@ -118,13 +114,20 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 				bool: query
 			},
 			size: req.config.post.pagination.pageBy,
-			from: paginationFrom
+			from: paginationFrom,
+			_source: ["postId"]
 		}
 	});
-	
+
+	const posts = await req.mongo.collection('posts').find({
+		postId: {$in: result.hits.hits.map(v => v._source.postId)}
+	}, {
+		projection: {content: 0}
+	}).toArray();
+
 	res.json({
 		ok: true,
-		posts: Filter.filterPosts(result.hits.hits)
+		posts: Filter.filterPosts(posts)
 	});
 });
 

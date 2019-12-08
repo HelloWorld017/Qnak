@@ -1,9 +1,9 @@
 <template>
 	<header class="QkHeader">
-		<h1 class="QkHeader__title">
+		<router-link :to="`/archive/${context}`" class="QkHeader__title">
 			<slot></slot>
-		</h1>
-		
+		</router-link>
+
 		<qk-input-search @submit="search" />
 		<router-link class="QkHeader__link" :to="`/write/${context}`">
 			<icon-write class="QkHeader__icon"/>
@@ -19,16 +19,20 @@
 		align-items: center;
 		padding: 20px;
 		font-family: var(--main-font);
-		
+
 		&__title {
+			color: var(--grey-800);
+			font-size: 1.8rem;
+			font-weight: 600;
+			text-decoration: none;
 			margin: 0;
 			flex: 1;
 		}
-		
+
 		&__link {
 			margin: 0 15px;
 		}
-		
+
 		&__icon {
 			width: 2rem;
 			height: 2rem;
@@ -42,7 +46,7 @@
 	import QkHeaderUser from "./QkHeaderUser.vue";
 	import QkInputSearch from "../components/QkInputSearch.vue";
 	import QkNotification from "./QkNotification.vue";
-	
+
 	export default {
 		props: {
 			context: {
@@ -50,7 +54,7 @@
 				default: ''
 			}
 		},
-		
+
 		methods: {
 			search(text) {
 				this.$router.push({
@@ -59,7 +63,7 @@
 				});
 			}
 		},
-		
+
 		components: {
 			IconWrite,
 			QkHeaderUser,

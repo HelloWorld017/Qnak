@@ -16,7 +16,7 @@
 		border-top: solid 10px var(--theme-color);
 		box-sizing: border-box;
 	}
-	
+
 	.App__router {
 		background: var(--grey-150);
 	}
@@ -26,6 +26,17 @@
 	html, body {
 		margin: 0;
 		padding: 0;
+	}
+
+	.Fade {
+		&-enter-active, &-leave-active {
+			transition: all .3s ease;
+		}
+
+		&-enter, &-leave-to {
+			opacity: 0;
+			transform: translateX(-2px);
+		}
 	}
 </style>
 

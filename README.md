@@ -1,15 +1,26 @@
-# 만들어야 할 것
-* 포스트 목록 보기
+# Qnak
+> QNA in Kaist
+
+A SPARCS newbie project
+
+## Warning
+As this is a newbie project, the project development period was too short to implement all features,  
+and purpose of this project is only "practice".  
+
+Also, the DB structure and most things have been twisted and monkey-patched.  
+(Example: User ACL, Post & PostMetadata, and more...)  
+
+So, there might be inefficient or duplicated(because of copy-paste) codes.
+
+## Not Implemented
 * 답변 쓰기 / 보기
 * 댓글 쓰기 / 보기
-* 태그기능
 * 포인트가 높은 유저 보기
 * 수정기능
 * 삭제기능
 * 반응형 레이아웃
 * 유저 페이지
 * 유저 메뉴
-* 검색 페이지
 * 고급 검색 옵션
 * KLMS와 연동하기
 	* 과정이 세션 하이재킹을 통한 해킹과 유사하기 때문에 구현할 계획 없음
