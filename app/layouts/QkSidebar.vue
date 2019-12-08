@@ -1,6 +1,8 @@
 <template>
 	<aside class="QkSidebar">
-		<qnak-branding class="QkSidebar__logo"></qnak-branding>
+		<router-link to="/">
+			<qnak-branding class="QkSidebar__logo"></qnak-branding>
+		</router-link>
 
 		<div class="QkSidebar__boards">
 

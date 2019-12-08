@@ -17,7 +17,9 @@ const config = {
 		
 		security: {
 			sessionExpiresIn: 5 * 60 * 1000,
-			tokenExpiresIn: 30 * 1000
+			tokenExpiresIn: 30 * 1000,
+			ssoId: 'test4bc872bb1371bc6d',
+			ssoSecret: '0a9a32efaaeb2deb4855'
 		},
 		
 		db: {
@@ -53,7 +55,12 @@ const config = {
 					files: 32,
 					parts: 128
 				}
-			}
+			},
+			pagination: {
+				pageBy: 30,
+				maxPage: 500
+			},
+			tagsPagination: 30
 		},
 
 		userAcl: {
@@ -62,7 +69,8 @@ const config = {
 					'post.read',
 					'post.read.search',
 					'comment.read',
-					'user.auth'
+					'user.auth',
+					'tags.list'
 				]
 			},
 
@@ -102,14 +110,16 @@ const config = {
 			// Decreasing score
 			// All children of acl node are combined
 			entries: {
-				'post.read': 10,		// 3000 per 10 minutes
+				'post.read': 5,			// 6000 per 10 minutes
 				'post.read.search': 100,// 300 per 10 minuntes
 				'post.write': 500,		// 60 per 10 minutes
 				'post.update': 500,		// 60 per 10 minutes
 				'post.delete': 500,		// 60 per 10 minutes
+				'post.vote': 100,		// 300 per 10 minutes
 				'report.create': 500,	// 60 per 10 minutes
 				'user.updateInfo': 500,	// 60 per 10 minutes
-				'user.auth': 500		// 60 per 10 minutes
+				'user.auth': 500,		// 60 per 10 minutes
+				'tags.list': 100
 			}
 		},
 		

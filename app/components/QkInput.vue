@@ -2,7 +2,7 @@
 	<input class="QkInput" type="text" v-model="inputText"
 		:autocomplete="hintOnOff" :autocorrect="hintOnOff"
 		:autocapitalize="hintOnOff" :spellcheck="hintTrueFalse"
-		:placeholder="placeholder">
+		:placeholder="placeholder" :maxlength="maxlength">
 </template>
 
 <style lang="less" scoped>
@@ -38,7 +38,9 @@
 			placeholder: {
 				type: String,
 				default: ''
-			}
+			},
+			
+			maxlength: Number
 		},
 		
 		computed: {

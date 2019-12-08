@@ -32,6 +32,11 @@
 			QkTinyListing
 		},
 		
+		beforeRouteEnter(to, from, next) {
+			document.title = "Qnak";
+			next();
+		},
+		
 		async mounted() {
 			const {code, state} = this.$route.query;
 			

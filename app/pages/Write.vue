@@ -2,7 +2,7 @@
 	<main class="Write" id="Write">
 		<qk-header />
 
-		<form class="Write__container QkContainer" @submit.prevent="uploadPost" v-if="hasWriteACL">
+		<form class="Write__container QkContainer" @submit.prevent="" v-if="hasWriteACL">
 			<h1 class="Write__title">{{$t('write')}}</h1>
 			
 			<label class="Write__row">
@@ -23,10 +23,10 @@
 			</label>
 			
 			<qk-editor class="Write__editor" ref="editor" editable />
-			
-			<button type="submit" class="Write__submit">
+			<qk-input-tag class="Write__row" v-model="tags" />
+			<qk-button class="Write__submit" @click="uploadPost">
 				{{$t('write-submit')}}
-			</button>
+			</qk-button>
 		</form>
 		<qk-acl v-else />
 	</main>
@@ -75,7 +75,7 @@
 		&__row {
 			display: flex;
 			align-items: center;
-			margin-left: 2rem;
+			margin: 0 2rem;
 			margin-bottom: 1rem;
 		}
 		
@@ -104,39 +104,27 @@
 		
 		&__editor {
 			margin: 0 2rem;
+			margin-bottom: 1rem;
 			min-height: 30vh;
 		}
 		
 		&__submit {
-			border: none;
-			border-radius: 5px;
-			padding: 7px 20px;
 			margin-top: 2rem;
 			margin-left: 2rem;
-			transition: all .4s ease;
-			
-			background: var(--theme-color);
-			cursor: pointer;
-			color: var(--grey-100);
-			font-family: var(--main-font);
-			font-size: 1rem;
-			font-weight: 500;
-			outline: none;
-			
-			&:hover {
-				background: var(--theme-300);
-			}
 		}
 	}
 </style>
 
 <script>
 	import QkAcl from "../layouts/QkAcl.vue";
+	import QkButton from "../components/QkButton.vue";
 	import QkCheckbox from "../components/QkCheckbox.vue";
 	import QkChooser from "../components/QkChooser.vue";
 	import QkEditor from "../layouts/QkEditor.vue";
 	import QkHeader from "../layouts/QkHeader.vue";
 	import QkInput from "../components/QkInput.vue";
+	import QkInputTag from "../components/QkInputTag.vue";
+	import QnakApp from "../";
 	
 	export default {
 		data() {
@@ -181,6 +169,11 @@
 			}
 		},
 		
+		beforeRouteEnter(to, from, next) {
+			document.title = `Qnak - ${QnakApp.i18n.t('qnak-write')}`;
+			next();
+		},
+		
 		mounted() {
 			// TODO acl check
 			if(this.$route.params.postId) {
@@ -190,11 +183,13 @@
 		
 		components: {
 			QkAcl,
+			QkButton,
 			QkCheckbox,
 			QkChooser,
 			QkEditor,
 			QkHeader,
-			QkInput
+			QkInput,
+			QkInputTag
 		}
 	};
 </script>

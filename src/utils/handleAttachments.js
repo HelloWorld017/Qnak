@@ -5,6 +5,8 @@ const sanitizeFilename = require('sanitize-filename');
 
 module.exports = async (req, postId, files) => {
 	// TODO sanitize files
+	if(files.length === 0) return [];
+	
 	const destDir = path.resolve(req.config.post.uploads.dest, postId);
 	
 	try {

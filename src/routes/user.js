@@ -12,7 +12,7 @@ const SSOClient = require('../utils/SSOClient');
 const StatusCodeError = require('../utils/StatusCodeError');
 
 const router = createAsyncRouter();
-const ssoClient = new SSOClient('test4bc872bb1371bc6d', '0a9a32efaaeb2deb4855')
+const ssoClient = new SSOClient(config.store.security.ssoId, config.store.security.ssoSecret);
 
 router.post('/auth', aclRate('user.auth'), session, async (req, res) => {
 	if(req.authState) {
@@ -182,11 +182,29 @@ router.get('/me', async (req, res) => {
 	});
 });
 
-router.get('/:userId(~[a-zA-Z가-힣]+#[0-9]+)', (req, res) => {
+router.get('/:userId(~[a-zA-Z가-힣]+:[0-9]+)', async (req, res) => {
+	const userId = req.params.userId;
+	const match = userId.slice(1).match(RegexPalette.friendlyUidAlternative);
+	if(!match)
+		throw new StatusCodeError(422, "illegal-friendly-uid");
 	
+	const [base, hash] = match.slice(1);
+	const friendlyUid = `${base}#${hash}`;
+	
+	const user = await req.mongo.collection('users').findOne({
+		friendlyUid
+	});
+	
+	if(!user)
+		throw new StatusCodeError(404, "no-such-user");
+	
+	res.json({
+		ok: true,
+		user: Filter.filterUser(user, false)
+	});
 });
 
-router.patch('/:userId(~[a-zA-Z가-힣]+#[0-9]+)', (req, res) => {
+router.patch('/:userId(~[a-zA-Z가-힣]+:[0-9]+)', (req, res) => {
 	
 });
 

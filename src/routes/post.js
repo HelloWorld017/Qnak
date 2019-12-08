@@ -28,7 +28,8 @@ router.post('/', aclRate('post.write.ask'), upload('postUpload', {name: 'attachm
 	}
 	
 	content = sanitizer.sanitizeContent(content);
-	if(title.length === 0 || content.length === 0)
+	const excerpt = sanitizer.sanitizeAsText(content);
+	if(title.length === 0 || excerpt.length === 0)
 		throw new StatusCodeError(422, "some-content-is-empty");
 	
 	board = await req.mongo.collection('boards')
@@ -43,7 +44,11 @@ router.post('/', aclRate('post.write.ask'), upload('postUpload', {name: 'attachm
 	if((anonymous && !req.acl('post.write.ask.anonymous')) || (!anonymous && !req.acl('post.write.ask.public')))
 		throw new StatusCodeError(403, "not-allowed-to-do-this-job");
 	
-	const tagsParsed = tags.split(',');
+	let tagsParsed = tags.split(',');
+	tagsParsed = tagsParsed.filter((v, i) => !~tagsParsed.indexOf(v, i + 1));
+	tagsParsed = tagsParsed.filter(v => RegexPalette.tag.test(v)).slice(0, 16);
+	
+	const date = Date.now();
 	
 	const postFeatureIndex = Math.floor(content.length / 2);
 	const postIdHex =
@@ -54,25 +59,19 @@ router.post('/', aclRate('post.write.ask'), upload('postUpload', {name: 'attachm
 		Date.now().toString(16);
 	
 	const postId = BigInt(`0x${postIdHex}`).toString();
-	
-	const postObject = {
-		postId,
-		title,
-		author: req.friendlyUid,
-		excerpt: sanitizer.sanitizeAsText(content),
-		date: Date.now(),
-		college: board.college,
-		subject,
-		relation: 'question',
-		tags: tagsParsed,
-		anonymous,
-		attachments: await handleAttachments(req, postId, (req.files && req.files.postUpload) || [])
-	};
+	const attachments = await handleAttachments(req, postId, (req.files && req.files.postUpload) || []);
 	
 	await req.mongo.collection('posts').insertOne({
 		postId,
-		content,
+		title,
 		author: req.friendlyUid,
+		content,
+		date,
+		college: board.college,
+		subject,
+		tags: tagsParsed,
+		anonymous,
+		attachments,
 		upvote: 0,
 		downvote: 0,
 		answers: [],
@@ -82,7 +81,19 @@ router.post('/', aclRate('post.write.ask'), upload('postUpload', {name: 'attachm
 	await req.elastic.index({
 		index: 'qnak-posts',
 		routing: postId,
-		body: postObject
+		body: {
+			postId,
+			title,
+			author: req.friendlyUid,
+			excerpt,
+			date,
+			college: board.college,
+			subject,
+			relation: 'question',
+			tags: tagsParsed,
+			anonymous,
+			attachments
+		}
 	});
 	
 	res.json({
@@ -117,10 +128,10 @@ router.param('postId', async (req, res, next, postId) => {
 		return postData.hits.hits[0]._source;
 	};
 	
-	req.getPostMetadata = async () => {
+	req.getPostMetadata = async (option) => {
 		const postMetadata = await req.mongo.collection('posts').findOne({
 			postId
-		});
+		}, option);
 		
 		if(!postMetadata)
 			throw new StatusCodeError(404, "no-such-post");
@@ -138,10 +149,9 @@ router.patch('/:postId', aclRate('post.update'), async (req, res) => {
 });
 
 router.get('/:postId', aclRate('post.read'), async (req, res) => {
-	const postContent = await req.getPostContent();
 	const postMetadata = await req.getPostMetadata();
 
-	const post = Object.assign({}, postContent, postMetadata);
+	const post = Object.assign({}, postMetadata);
 	post.board = Filter.filterBoard(
 		await req.mongo.collection('boards').findOne({
 			boardId: post.subject
@@ -160,7 +170,7 @@ router.get('/:postId/vote', aclRate('post.read'), async (req, res) => {
 	if(typeof postId !== 'string')
 		throw new StatusCodeError(422, "wrong-given-for-postId");
 	
-	const voteQuery = await req.mongo.collection('posts').findOne({ postId }, {
+	const voteQuery = await req.getPostMetadata({
 		projection: { upvote: 1, downvote: 1, _id: 0 }
 	});
 	
@@ -173,20 +183,15 @@ router.get('/:postId/vote', aclRate('post.read'), async (req, res) => {
 		downvote: voteQuery.downvote
 	};
 	
-	if(!req.authState) {
-		/* const voted = await req.mongo.collection('users').findOne({
-			userId: req.userId,
-			$or: [
-				{$in: {upvotedPosts: req.params.postId}},
-				{$in: {downvotedPosts: req.params.postId}}
-			]
-		});
+	if(req.authState) {
+		if(req.user.upvotedPosts.includes(req.params.postId))
+			result.voted = 'upvote';
 		
-		result.voted = !!voted;
-		*/
+		else if(req.user.downvotedPosts.includes(req.params.postId))
+			result.voted = 'downvote';
 		
-		result.voted = req.user.upvotedPosts.includes(req.params.postId) ||
-			req.user.downvotedPosts.includes(req.params.postId);
+		else
+			result.voted = false;
 	}
 	
 	res.json(result);
@@ -196,6 +201,7 @@ router.post('/:postId/vote', aclRate('post.vote'), async (req, res) => {
 	if(!req.authState)
 		throw new StatusCodeError(403, "not-authorized");
 	
+	const postId = req.params.postId;
 	if(typeof postId !== 'string')
 		throw new StatusCodeError(422, "wrong-given-for-postId");
 	
@@ -218,39 +224,136 @@ router.post('/:postId/vote', aclRate('post.vote'), async (req, res) => {
 		};
 	}
 	
-	let voted = true;
+	let voted = false;
 	if(req.query.voteType === 'upvote') {
-		incObject.upvote++;
-		userUpdateObject.$push = {
-			upvotedPosts: req.params.postId
-		};
+		if(incObject.upvote === 0) {
+			incObject.upvote++;
+			userUpdateObject.$push = {
+				upvotedPosts: req.params.postId
+			};
+			voted = 'upvote';	
+		}
 	} else if(req.query.voteType === 'downvote') {
-		incObject.downvote++;
-		userUpdateObject.$push = {
-			downvotedPosts: req.params.postId
-		};
-	} else {
-		voted = false;
+		if(incObject.downvote === 0) {
+			incObject.downvote++;
+			userUpdateObject.$push = {
+				downvotedPosts: req.params.postId
+			};
+			voted = 'downvote';	
+		}
 	}
 	
-	const { value: postExists } = await req.mongo.collection('posts').findOneAndUpdate({
-		postId: req.params.postId
-	}, {
-		$inc: incObject
-	}, { projection: {_id: 0, upvote: 1, downvote: 1} });
-	
-	if(!postExists)
-		throw new StatusCodeError(404, "no-such-post");
-	
-	await req.mongo.collection('users').findOneAndUpdate({
-		userId: req.userId
-	}, userUpdateObject, { projection: {_id: 1} });
+	let post = null;
+	if(incObject.downvote !== 0 || incObject.upvote !== 0) {
+		const { value: postExists } = await req.mongo.collection('posts').findOneAndUpdate({
+			postId: req.params.postId
+		}, {
+			$inc: incObject
+		}, { projection: {_id: 0, upvote: 1, downvote: 1}, returnOriginal: false });
+		
+		if(!postExists)
+			throw new StatusCodeError(404, "no-such-post");
+		
+		post = postExists;
+		
+		await req.mongo.collection('users').findOneAndUpdate({
+			userId: req.userId
+		}, userUpdateObject, { projection: {_id: 1} });
+	} else {
+		post = await req.mongo.collection('posts').findOne({
+			postId: req.params.postId
+		});
+		
+		if(!post)
+			throw new StatusCodeError(404, "no-such-post");
+	}
 	
 	res.json({
 		ok: true,
-		upvote: postExists.upvote,
-		downvote: postExists.downvote,
+		upvote: post.upvote,
+		downvote: post.downvote,
 		voted
+	});
+});
+
+router.post('/:postId/answer', aclRate('post.write.answer'), upload('postUpload', {name: 'attachments'}), async (req, res) => {
+	if(!req.body || typeof req.body !== 'object')
+		throw new StatusCodeError(422, "post-description-not-given");
+	
+	const parentId = req.params.postId;
+	// Check parent exists
+	await req.getPostMetadata({ projection: { _id: 1 } });
+	
+	let {content, anonymous} = req.body;
+	if(typeof content !== 'string' || typeof anonymous !== 'boolean')
+		throw new StatusCodeError(422, "wrong-given-for-post-description");
+	
+	content = sanitizer.sanitizeContent(content);
+	const excerpt = sanitize.sanitizeAsText(content);
+	
+	if(title.length === 0 || excerpt.length === 0)
+		throw new StatusCodeError(422, "some-content-is-empty");
+
+	if(!req.authState)
+		throw new StatusCodeError(403, "not-authorized");
+	
+	if((anonymous && !req.acl('post.write.answer.anonymous')) || (!anonymous && !req.acl('post.write.answer.public')))
+		throw new StatusCodeError(403, "not-allowed-to-do-this-job");
+	
+	const date = Date.now();
+	
+	const postFeatureIndex = Math.floor(content.length / 2);
+	const postIdHex =
+		crypto.createHash('md5')
+			.update(req.userId + content.slice(postFeatureIndex, postFeatureIndex + 30))
+			.digest('hex').slice(0, 7) +
+		Math.floor(Math.random() * 100).toString(16) +
+		Date.now().toString(16);
+	
+	const postId = BigInt(`0x${postIdHex}`).toString();
+	const attachments = await handleAttachments(req, postId, (req.files && req.files.postUpload) || []);
+	
+	await req.mongo.collection('posts').insertOne({
+		postId,
+		author: req.friendlyUid,
+		content,
+		date,
+		anonymous,
+		attachments,
+		upvote: 0,
+		downvote: 0,
+		parent: parentId,
+		comments: []
+	});
+	
+	await req.elastic.index({
+		index: 'qnak-posts',
+		routing: parentId,
+		body: {
+			postId,
+			author: req.friendlyUid,
+			excerpt,
+			date,
+			relation: 'answer',
+			anonymous,
+			attachments,
+			targetId: parentId
+		}
+	});
+	
+	await req.mongo.collection('posts').findOneAndUpdate({
+		postId: parentId
+	}, {
+		$push: {
+			answers: postId
+		}
+	}, {
+		projection: { _id: 1 }
+	});
+	
+	res.json({
+		ok: true,
+		id: postId
 	});
 });
 
@@ -258,11 +361,7 @@ router.get('/:postId/comment', aclRate('comment.read'), async (req, res) => {
 
 });
 
-router.get('/:postId/answer', aclRate('post.read'), async (req, res) => {
-
-});
-
-router.post('/:postId/answer', aclRate('post.write'), async (req, res) => {
+router.post('/:postId/comment', aclRate('commet.write'), async (req, res) => {
 	
 });
 

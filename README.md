@@ -12,6 +12,7 @@
 * 검색 페이지
 * 고급 검색 옵션
 * KLMS와 연동하기
+	* 과정이 세션 하이재킹을 통한 해킹과 유사하기 때문에 구현할 계획 없음
 	1. kaist.ac.kr 상의 서브도메인을 얻음
 	2. `https://portalsso.kaist.ac.kr/login.ps?returnURL=(해당 도메인)` iframe을 띄움
 	3. PortalSSO의 Cookie인 ObSSOCookie와 evSSOCookie가 `.kaist.ac.kr` 을 대상으로 하기 때문에 해당 도메인에서 쿠키에 접근 가능

@@ -3,9 +3,7 @@
 		<qk-sidebar></qk-sidebar>
 
 		<transition name="Fade" mode="out-in">
-			<keep-alive>
-				<router-view class="App__router"></router-view>
-			</keep-alive>
+			<router-view class="App__router"></router-view>
 		</transition>
 	</div>
 </template>

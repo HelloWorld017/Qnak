@@ -23,7 +23,7 @@ const Filter = {
 	
 	filterUser(user, isMe = false) {
 		const allowedKeys = [
-			'userId', 'friendlyUid', 'username',
+			'friendlyUid', 'username',
 			'plusPoint', 'minusPoint',
 			'profile'
 		];

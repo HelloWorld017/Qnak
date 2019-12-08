@@ -40,32 +40,43 @@ Saved in: `elastic > qnak-posts`
 | relation    | Join type of document, for answer, it's name is 'answer'.    |
 | anonymous   | Is this value is true, the author becomes hidden             |
 | attachments | Array of attachment Ids                                      |
+| targetId    | Parent postId                                                |
 
 ## PostMetadata
 Saved in `mongodb > qnak > posts`
 
-| Name     | Description                                                  |
-|----------|--------------------------------------------------------------|
-| postId   | Id of post, which is unique decimal string.                  |
-| content  | HTML of content                                              |
-| author   | FriendlyUid of author                                        |
-| upvote   | Amount of upvotes                                            |
-| downvote | Amount of downvotes                                          |
-| answers  | Array of answers                                             |
-| comments | Array of commentId                                           |
+| Name        | Description                                                  |
+|-------------|--------------------------------------------------------------|
+| postId      | Id of post, which is unique decimal string.                  |
+| author      | FriendlyUid of author                                        |
+| title       | Title of post                                                |
+| content     | HTML of content                                              |
+| date        | The unix timestamp (in milliseconds) of last modified time.  |
+| college     | Alphabet letters of subject code (Ex: CS, MAS, HSS, IE, ...) |
+| subject     | Subject code                                                 |
+| tags        | List of tags                                                 |
+| anonymous   | Is this value is true, the author becomes hidden             |
+| attachments | Array of attachment Ids                                      |
+| upvote      | Amount of upvotes                                            |
+| downvote    | Amount of downvotes                                          |
+| answers     | Array of answer postIds                                      |
+| comments    | Array of commentId                                           |
 
 ## AnswerMetadata
 Saved in `mongodb > qnak > posts`
 
-| Name     | Description                                                  |
-|----------|--------------------------------------------------------------|
-| postId   | Id of post, which is unique decimal string.                  |
-| content  | Content of answer                                            |
-| author   | FriendlyUid of author                                        |
-| upvote   | Amount of upvotes                                            |
-| downvote | Amount of downvotes                                          |
-| parent   | postId of ask                                                |
-| comments | Array of commentId                                           |
+| Name        | Description                                                  |
+|-------------|--------------------------------------------------------------|
+| postId      | Id of post, which is unique decimal string.                  |
+| content     | Content of answer                                            |
+| date        | The unix timestamp (in milliseconds) of last modified time.  |
+| anonymous   | Is this value is true, the author becomes hidden             |
+| attachments | Array of attachment Ids                                      |
+| author      | FriendlyUid of author                                        |
+| upvote      | Amount of upvotes                                            |
+| downvote    | Amount of downvotes                                          |
+| parent      | postId of ask                                                |
+| comments    | Array of commentId                                           |
 
 # User
 ## User

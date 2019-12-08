@@ -11,5 +11,7 @@
 	"not-authorized": "로그인 되어있지 않습니다.",
 	"not-allowed-to-do-this-job": "권한이 없습니다. 관리자에게 문의해주세요.",
 	"post-show-failed": "포스트 가져오기 실패",
-	"post-show-failed-desc": "포스트를 가져오는 동안 문제가 발생했습니다!"
+	"post-show-failed-desc": "포스트를 가져오는 동안 문제가 발생했습니다!",
+	"qnak-write": "글 쓰기",
+	"all-posts": "모든 글"
 }

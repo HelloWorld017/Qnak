@@ -4,5 +4,7 @@
 	"request-failed": "Connection Failed",
 	"request-failed-desc": "Please check your connection.",
 	"write-failed": "Failed to upload your post.",
-	"write-failed-desc": "Please try again."
+	"write-failed-desc": "Please try again.",
+	"qnak-write": "Write",
+	"all-posts": "All Questions"
 }

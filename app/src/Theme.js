@@ -3,8 +3,11 @@ class Theme {
 		const defaultTheme = {
 			'main-font': '"Noto Sans CJK KR", sans-serif',
 			'theme-color': '#f4516f',
+			'theme-200': '#f99fb0',
 			'theme-300': '#f66f88',
 			'theme-400': '#f4516f',
+			
+			'link-400': '#00acc1', //Link is blue, not green (Green is zelda)
 			
 			'grey-050': '#ffffff',
 			'grey-100': '#fafafa',
@@ -14,6 +17,7 @@ class Theme {
 			'grey-300': '#cacbcc',
 			'grey-400': '#8a8a8b',
 			'grey-500': '#6a6a6a',
+			'grey-700': '#303030',
 			'grey-800': '#202020',
 			'lang': 'ko'
 		};

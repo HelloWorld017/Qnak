@@ -13,7 +13,7 @@ class VueRequest {
 		this.api = this.request.bind(this);
 	}
 
-	async request(url, method = 'get', body = null) {
+	async request(url, method = 'get', body = null, options = null) {
 		const configuration = {
 			url,
 			method,
@@ -24,6 +24,10 @@ class VueRequest {
 
 		if(body) {
 			configuration.data = body;
+		}
+		
+		if(options) {
+			Object.assign(configuration, options);
 		}
 
 		const {data} = await this.default(configuration);

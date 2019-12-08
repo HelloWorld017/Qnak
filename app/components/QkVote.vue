@@ -1,25 +1,46 @@
 <template>
-	<div class="QkVote" :class="{'QkVote--disabled': voted}">
-		<a class="QkVote__item" @click="upvote">
-			<icon-upvote />
+	<div class="QkVote">
+		<a class="QkVote__item" :class="{'QkVote__item--active': voted === 'upvote'}" @click="upvote">
+			<icon-upvote class="QkVote__icon" />
 			{{upvoteCount}}
 		</a>
 		
-		<a class="QkVote__item" @click="downvote">
+		<a class="QkVote__item" :class="{'QkVote__item--active': voted === 'downvote'} "@click="downvote">
 			{{downvoteCount}}
-			<icon-downvote/>
+			<icon-downvote class="QkVote__icon" />
 		</a>
 	</div>
 </template>
 
 <style lang="less" scoped>
 	.QkVote {
-		margin-top: 2rem;
+		margin-top: .8rem;
+		
 		&__item {
+			cursor: pointer;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
+			color: var(--theme-400);
 			font-family: var(--main-font);
+			font-size: .8rem;
+			
+			&:first-child {
+				margin-bottom: .8rem;
+			}
+		}
+	}
+</style>
+
+<style lang="less">
+	.QkVote__item {
+		& > .QkVote__icon * {
+			fill: var(--theme-400);
+			transition: all .4s ease;
+		}
+
+		&--active > .QkVote__icon * {
+			fill: var(--theme-200);
 		}
 	}
 </style>
@@ -38,21 +59,24 @@
 		
 		data() {
 			return {
-				voted: true,
+				voted: false,
 				upvoteCount: 0,
 				downvoteCount: 0
 			};
 		},
 		
 		methods: {
-			async upvote() {
-				const result = await this.$api(`/post/${this.postId}/vote?voteType=upvote`);
+			async vote(voteType) {
+				const result = await this.$api(`/post/${this.postId}/vote?voteType=${voteType}`, 'post');
 				await this.refreshVote(result);
 			},
 			
+			async upvote() {
+				await this.vote('upvote');
+			},
+			
 			async downvote() {
-				const result = await this.$api(`/post/${this.postId}/vote?voteType=downvote`);
-				await this.refreshVote(result);
+				await this.vote('downvote');
 			},
 			
 			async refreshVote(voteStatus) {

@@ -7,7 +7,7 @@ const router = createAsyncRouter();
 
 router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 	const query = {};
-
+	
 	const archive = req.params.archive;
 	if(typeof archive === 'string' && archive.length > 0) {
 		if(!query.filter) query.filter = {};
@@ -16,7 +16,7 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 		const archiveSplit = archive.split(':');
 		switch(archiveSplit[0]) {
 			case 'user':
-				query.filter.terms.author = archiveSplit[1];
+				query.filter.terms.author = `${archiveSplit[1]}#${archiveSplit[2]}`;
 				break;
 
 			case 'college':
@@ -81,9 +81,12 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 		query.bool.filter.terms.tags = tagsParsed;
 	}
 
-	const dateStart = req.query.from;
-	const dateEnd = req.query.to;
-	if(typeof dateStart === 'number' || typeof dateEnd === 'number') {
+	const dateStart = parseInt(req.query.from);
+	const dateEnd = parseInt(req.query.to);
+	if(
+		(isFinite(dateStart) && dateStart > 0) ||
+		(isFinite(dateEnd) && dateEnd > 0)
+	) {
 		if(!query.filter) query.filter = {};
 		if(!query.filter.range) query.filter.range = {date: {}};
 
@@ -93,19 +96,36 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 		if(typeof dateEnd === 'number')
 			query.filter.range.date.lte = dateEnd;
 	}
-
+	
+	const page = parseInt(req.query.page);
+	const paginationFrom =
+		(isFinite(page) && page >= 0) ?
+		Math.min(req.config.post.pagination.maxPage, page) * req.config.post.pagination.pageBy :
+		0;
+	
+	console.log(JSON.stringify({
+		query: {
+			bool: query
+		},
+		size: req.config.post.pagination.pageBy,
+		from: paginationFrom
+	}, null, '\t'));
+	
 	const {body: result} = await req.elastic.search({
 		index: 'qnak-posts',
 		body: {
 			query: {
 				bool: query
-			}
+			},
+			size: req.config.post.pagination.pageBy,
+			from: paginationFrom
 		}
 	});
-
-	res.json(
-		Filter.filterPosts(result)
-	);
+	
+	res.json({
+		ok: true,
+		posts: Filter.filterPosts(result.hits.hits)
+	});
 });
 
 module.exports = router;

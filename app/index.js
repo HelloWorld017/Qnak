@@ -14,8 +14,10 @@ import Write from "./pages/Write.vue";
 import i18nEn from "./i18n/en.json";
 import i18nKo from "./i18n/ko.json";
 import storeDescriptor from "./src/store";
+import moment from "moment";
 
 import "@mdi/font";
+import "moment/locale/ko";
 import "izitoast/dist/css/iziToast.css";
 
 Vue.use(Vuex);
@@ -54,6 +56,8 @@ const QnakApp = {};
 	const theme = await Theme.load();
 	theme.apply(QnakApp);
 	QnakApp.theme = theme;
+	
+	moment.locale(i18n.locale);
 	
 	const errorDialog = new ErrorDialog(QnakApp);
 	QnakApp.error = errorDialog;

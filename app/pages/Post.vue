@@ -6,7 +6,8 @@
 
 		<div class="QkContainer">
 			<qk-post :post="post" />
-			<qk-post v-for="answer in answers" :post="answer" />
+			<qk-post v-for="answer in post.answers" :key="answer" :post="answer" lazyload />
+			<qk-write-answer :postId="post.postId" />
 		</div>
 	</main>
 	
@@ -15,6 +16,7 @@
 
 <style lang="less" scoped>
 	#Post {
+		overflow: auto;
 		flex: 1;
 	}
 </style>
@@ -23,18 +25,21 @@
 	import QkHeader from "../layouts/QkHeader.vue";
 	import QkLoading from "../layouts/QkLoading.vue";
 	import QkPost from "../layouts/QkPost.vue";
+	import QkWriteAnswer from "../layouts/QkWriteAnswer.vue";
+	import QnakApp from "../";
 	
 	export default {
 		data() {
 			return {
-				post: null,
-				answers: []
+				post: null
 			};
 		},
 		
 		methods: {
-			async updatePost() {
-				const post = await this.$api(`/post/${this.$route.params.postId}`);
+			async updatePost(post = null) {
+				if(!post)
+					post = await this.$api(`/post/${this.$route.params.postId}`);
+				
 				if(!post.ok) {
 					if(post.reason === "no-such-post") {
 						this.$router.replace('/404');
@@ -48,18 +53,36 @@
 			}
 		},
 		
-		mounted() {
-			this.updatePost();
+		async beforeRouteEnter(to, from, next) {
+			const post = await QnakApp.request.api(`/post/${to.params.postId}`);
+			if(post.ok)
+				document.title = `Qnak - ${post.post.title}`;
+			
+			next(vm => {
+				vm.post = post.post;
+			});
 		},
 		
-		beforeRouteUpdate() {
-			this.updatePost();
+		async beforeRouteUpdate(to, from, next) {
+			const post = await QnakApp.request.api(`/post/${to.params.postId}`);
+			if(post.ok)
+				document.title = `Qnak - ${post.post.title}`;
+				
+			vm.post = post.post;
+			next();
+		},
+		
+		mounted() {
+			this.$nextTick(() => {
+				if(!this.post) this.updatePost();
+			});
 		},
 		
 		components: {
 			QkHeader,
 			QkLoading,
-			QkPost
+			QkPost,
+			QkWriteAnswer
 		}
 	};
 </script>
