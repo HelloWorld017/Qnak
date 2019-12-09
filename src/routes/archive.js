@@ -6,25 +6,24 @@ const createAsyncRouter = require('../utils/createAsyncRouter');
 const router = createAsyncRouter();
 
 router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
-	const query = {};
+	const query = {
+		filter: []
+	};
 
 	const archive = req.params.archive;
 	if(typeof archive === 'string' && archive.length > 0) {
-		if(!query.filter) query.filter = {};
-		if(!query.filter.term) query.filter.term = {};
-
 		const archiveSplit = archive.split(':');
 		switch(archiveSplit[0]) {
 			case 'user':
-				query.filter.term.author = `${archiveSplit[1]}#${archiveSplit[2]}`;
+				query.filter.push({term: {author: `${archiveSplit[1]}#${archiveSplit[2]}`}});
 				break;
 
 			case 'college':
-				query.filter.term.college = archiveSplit[1];
+				query.filter.push({term: {college: archiveSplit[1]}});
 				break;
 
 			case 'subject':
-				query.filter.term.subject = archiveSplit[1];
+				query.filter.push({term: {subject: archiveSplit[1]}});
 				break;
 
 			case 'relevant':
@@ -79,10 +78,7 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 	const tags = req.query.tags;
 	if(typeof tags === 'string' && tags.length > 0) {
 		const tagsParsed = tags.split(',');
-		if(!query.filter) query.filter = {};
-		if(!query.filter.terms) query.filter.terms = {};
-
-		query.bool.filter.terms.tags = tagsParsed;
+		query.bool.filter.push({terms: {tags: tagsParsed}});
 	}
 
 	const dateStart = parseInt(req.query.from);
@@ -91,14 +87,15 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 		(isFinite(dateStart) && dateStart > 0) ||
 		(isFinite(dateEnd) && dateEnd > 0)
 	) {
-		if(!query.filter) query.filter = {};
-		if(!query.filter.range) query.filter.range = {date: {}};
+		const rangeFilter = {};
 
 		if(typeof dateStart === 'number')
-			query.filter.range.date.gte = dateStart;
+			rangeFilter.date.gte = dateStart;
 
 		if(typeof dateEnd === 'number')
-			query.filter.range.date.lte = dateEnd;
+			rangeFilter.date.lte = dateEnd;
+			
+		query.bool.filter.push({range: rangeFilter});
 	}
 
 	const page = parseInt(req.query.page);
@@ -118,7 +115,7 @@ router.get('/:archive?', aclRate('post.read.search'), async (req, res) => {
 			_source: ["postId"]
 		}
 	});
-
+	
 	const posts = await req.mongo.collection('posts').find({
 		postId: {$in: result.hits.hits.map(v => v._source.postId)}
 	}, {

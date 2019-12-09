@@ -1,4 +1,5 @@
 const createHasAcl = require('../utils/createHasAcl');
+const eccrypto = require('eccrypto');
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
 
@@ -12,9 +13,14 @@ module.exports = () => {
 
 		try {
 			token = await promisify(jwt.verify)(authToken, req.config.$secret);
-
+			
+			const publicKey = Buffer.from(token.publicKey, 'base64');
+			const message = Buffer.from(token.authVerification, 'base64');
+			const signature = Buffer.from(req.cookies.tokenVerification, 'base64');
+			await eccrypto.verify(publicKey, message, signature);
+			
 			const user = await req.mongo.collection('users').findOne({
-				userId: token.userId
+				friendlyUid: token.friendlyUid
 			});
 
 			if(token.lastUpdate !== user.lastUpdate) {
@@ -22,7 +28,7 @@ module.exports = () => {
 			}
 
 			req.authState = true;
-			req.userId = token.userId;
+			req.userId = user.userId;
 			req.username = token.username;
 			req.friendlyUid = token.friendlyUid;
 			req.user = user;

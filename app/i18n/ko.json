@@ -13,5 +13,9 @@
 	"post-show-failed": "포스트 가져오기 실패",
 	"post-show-failed-desc": "포스트를 가져오는 동안 문제가 발생했습니다!",
 	"qnak-write": "글 쓰기",
-	"all-posts": "모든 글"
+	"all-posts": "모든 글",
+	"comment-show-failed": "댓글 가져오기 실패",
+	"comment-show-failed-desc": "댓글을 가져오는 동안 문제가 발생했습니다!",
+	"comment-write-failed": "댓글 작성에 실패했습니다.",
+	"comment-write-failed-desc": "조금 후에 다시 시도해주세요."
 }

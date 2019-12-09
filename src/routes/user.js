@@ -133,8 +133,8 @@ router.post('/auth/finalize', aclRate('user.auth'), session, async (req, res) =>
 	
 	const token = await new Promise((resolve, reject) => {
 		jwt.sign({
-			publicKey: publicKey.toString('hex'),
-			userId: qnakUser.userId,
+			publicKey: publicKey.toString('base64'),
+			authVerification: random.toString('base64'),
 			username: qnakUser.username,
 			friendlyUid: qnakUser.friendlyUid,
 			lastUpdate: qnakUser.lastUpdate
@@ -146,10 +146,10 @@ router.post('/auth/finalize', aclRate('user.auth'), session, async (req, res) =>
 		});
 	});
 	
-	res.cookie('tokenVerification', signature.toString('hex'), {
+	res.cookie('tokenVerification', signature.toString('base64'), {
 		httpOnly: true,
 		secure: req.app.get('env') !== 'development',
-		maxAge: req.config.security.sessionExpiresIn
+		maxAge: req.config.security.tokenExpiresIn * 1000
 	});
 	
 	res.json({

@@ -1,7 +1,7 @@
 <template>
 	<section class="QkPost" v-if="item">
 		<div class="QkPost__main">
-			<qk-vote :postId="item.postId"/>
+			<qk-vote :post-id="item.postId"/>
 			<div class="QkPost__content">
 				<h2 class="QkPost__title" v-if="item.title">{{item.title}}</h2>
 				<div class="QkPost__metadata">
@@ -26,7 +26,7 @@
 		</div>
 
 		<h3>{{$t('post-comments')}}</h3>
-		<qk-comments :post="item" class="QkPost__comments" />
+		<qk-comments :post-id="item.postId" class="QkPost__comments" />
 	</section>
 	<div v-else>
 		<intersect @enter="loadItem">

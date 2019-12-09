@@ -285,8 +285,9 @@ router.post('/:postId/answer', aclRate('post.write.answer'), upload('postUpload'
 		throw new StatusCodeError(422, "post-description-not-given");
 
 	const parentId = req.params.postId;
-	// Check parent exists
-	await req.getPostMetadata({ projection: { _id: 1 } });
+	const parentPost = await req.getPostMetadata({ projection: { _id: 1, answers: 1 } });
+	if(!Array.isArray(parentPost.answers))
+		throw new StatusCodeError(404, "no-such-post");
 
 	const {body: parentIdResult} = await req.elastic.search({
 		index: 'qnak-posts',
@@ -324,7 +325,7 @@ router.post('/:postId/answer', aclRate('post.write.answer'), upload('postUpload'
 
 	const date = Date.now();
 
-	const postFeatureIndex = Math.floor(content.length / 2);
+	const postFeatureIndex = Math.floor(excerpt.length / 2);
 	const postIdHex =
 		crypto.createHash('md5')
 			.update(req.userId + excerpt.slice(postFeatureIndex, postFeatureIndex + 30))
@@ -384,11 +385,109 @@ router.post('/:postId/answer', aclRate('post.write.answer'), upload('postUpload'
 });
 
 router.get('/:postId/comment', aclRate('comment.read'), async (req, res) => {
-
+	const postInfo = await req.getPostMetadata({
+		projection: {
+			comments: 1
+		}
+	});
+	
+	const postComments = await req.mongo.collection('comments').find({
+		commentId:{
+			$in: postInfo.comments
+		}
+	}).toArray();
+	
+	res.json({
+		ok: true,
+		comments: postComments
+	});
 });
 
-router.post('/:postId/comment', aclRate('commet.write'), async (req, res) => {
+router.post('/:postId/comment', aclRate('comment.write'), async (req, res) => {
+	const parentId = req.params.postId;
+	await req.getPostMetadata({ projection: { _id: 1 } });
+	
+	const {body: parentIdResult} = await req.elastic.search({
+		index: 'qnak-posts',
+		body: {
+			query: {
+				bool: {
+					filter: {
+						match: {postId: parentId}
+					}
+				}
+			}
+		}
+	});
 
+	if(parentIdResult.hits.hits.length < 1)
+		throw new StatusCodeError(404, "no-such-post");
+
+	const parentElasticId = parentIdResult.hits.hits[0]._id;
+	
+	if(!req.authState)
+		throw new StatusCodeError(403, "not-authorized");
+	
+	const {content} = req.body;
+	
+	if(typeof content !== 'string' || content.length === 0)
+		throw new StatusCodeError(422, "wrong-given-for-content");
+	
+	const date = Date.now();
+	const postFeatureIndex = Math.floor(content.length / 2);
+	const commentIdHex =
+		crypto.createHash('md5')
+			.update(req.userId + content.slice(postFeatureIndex, postFeatureIndex + 30))
+			.digest('hex').slice(0, 7) +
+		Math.floor(Math.random() * 100).toString(16) +
+		Date.now().toString(16);
+
+	const commentId = BigInt(`0x${commentIdHex}`).toString();
+	
+	await req.mongo.collection('comments').insertOne({
+		commentId,
+		author: req.friendlyUid,
+		authorName: req.username,
+		content,
+		date,
+		parent: parentId
+	});
+
+	await req.elastic.index({
+		index: 'qnak-posts',
+		routing: parentId,
+		body: {
+			commentId,
+			author: req.friendlyUid,
+			excerpt: content,
+			date,
+			relation: {
+				name: 'comment',
+				parent: parentElasticId
+			}
+		}
+	});
+
+	await req.mongo.collection('posts').findOneAndUpdate({
+		postId: parentId
+	}, {
+		$push: {
+			comments: commentId
+		}
+	}, {
+		projection: { _id: 1 }
+	});
+	
+	res.json({
+		ok: true,
+		comment: {
+			commentId,
+			author: req.friendlyUid,
+			authorName: req.username,
+			content,
+			date
+		}
+	});
 });
 
 module.exports = router;

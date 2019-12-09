@@ -39,7 +39,6 @@ const loggers = require('./src/loggers');
 
 						postId: {type: "keyword"},
 						commentId: {type: "keyword"},
-						answerId: {type: "keyword"},
 						tags: {type: "keyword"},
 						author: {type: "keyword"},
 						date: {type: "date"},

@@ -119,7 +119,9 @@ const config = {
 				'report.create': 500,	// 60 per 10 minutes
 				'user.updateInfo': 500,	// 60 per 10 minutes
 				'user.auth': 500,		// 60 per 10 minutes
-				'tags.list': 100
+				'tags.list': 100,
+				'comment.read': 10,
+				'comment.write': 300
 			}
 		},
 

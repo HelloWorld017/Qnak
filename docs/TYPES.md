@@ -26,7 +26,6 @@ Saved in: `elastic > qnak-posts`
 | content   | Content of comment                                                              |
 | date      | The unix timestamp (in milliseconds) of last modified time.                     |
 | relation  | Join type of document, for comment, it's name is 'comment'.                     |
-| targetId  | Parent postId or parent answerId                                                |
 
 ## Answer
 Saved in: `elastic > qnak-posts`
@@ -40,7 +39,6 @@ Saved in: `elastic > qnak-posts`
 | relation    | Join type of document, for answer, it's name is 'answer'.    |
 | anonymous   | Is this value is true, the author becomes hidden             |
 | attachments | Array of attachment Ids                                      |
-| targetId    | Parent postId                                                |
 
 ## PostMetadata
 Saved in `mongodb > qnak > posts`
