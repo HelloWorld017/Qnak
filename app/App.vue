@@ -38,6 +38,17 @@
 			transform: translateX(-2px);
 		}
 	}
+	
+	.ListingAnim {
+		&-enter-active, &-leave-active, &-move {
+			transition: all .3s ease;
+		}
+		
+		&-enter, &-leave-to {
+			opacity: 0;
+			transform: translateX(-2px);
+		}
+	}
 </style>
 
 <script>

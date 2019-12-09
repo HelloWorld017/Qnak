@@ -5,7 +5,7 @@ const path = require('path');
 
 const config = {
 	store: {},
-	path: './config.json',
+	path: './config/config.json',
 	default: {
 		$secret: [...Array(10)]
 			.map(() => Math.random().toString(36).slice(2))

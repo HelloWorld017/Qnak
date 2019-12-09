@@ -43,6 +43,7 @@
 	}
 
 	.Archive__loader {
+		cursor: pointer;
 		display: flex;
 		color: var(--grey-800);
 		font-family: var(--main-font);
